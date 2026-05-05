@@ -38,14 +38,14 @@ export default function Favorites() {
           </div>
         ) : favoriteTeachers.length === 0 ? (
           <div className="text-center py-20" style={{
-            border:"1px dashed rgba(0,200,255,0.15)",
+            border:"1px dashed rgba(0,200,255,0.35)",
             background:"rgba(0,200,255,0.02)",
           }}>
-            <Heart className="h-12 w-12 mx-auto mb-4" style={{ color:"rgba(255,80,120,0.3)" }} />
-            <p style={{ fontFamily:"var(--font-display)",fontSize:"1rem",color:"rgba(0,200,255,0.4)",letterSpacing:"0.1em",textTransform:"uppercase" }}>
+            <Heart className="h-12 w-12 mx-auto mb-4" style={{ color:"rgba(255,80,120,0.8)" }} />
+            <p style={{ fontFamily:"var(--font-display)",fontSize:"1rem",color:"rgba(0,200,255,0.85)",letterSpacing:"0.1em",textTransform:"uppercase" }}>
               No favorites yet
             </p>
-            <p style={{ fontFamily:"var(--font-mono)",fontSize:"0.75rem",color:"rgba(0,200,255,0.3)",marginTop:"8px" }}>
+            <p style={{ fontFamily:"var(--font-mono)",fontSize:"0.75rem",color:"rgba(0,200,255,0.6)",marginTop:"8px" }}>
               Click the ❤️ on any faculty profile to add them here
             </p>
           </div>
