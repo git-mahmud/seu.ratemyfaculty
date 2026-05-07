@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 
 // ── Hardcoded stats (update manually) ──
 const STATS = {
-  pyqUploaded: 74,
+  pyqUploaded: 74+,
   usersJoined: 10+,
 };
 
