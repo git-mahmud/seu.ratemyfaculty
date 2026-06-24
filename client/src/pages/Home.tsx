@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 // ── Hardcoded stats (update manually) ──
 const STATS = {
   pyqUploaded: 109,
-  usersJoined: 10,
+  usersJoined: 17,
 };
 
 function StarField() {
