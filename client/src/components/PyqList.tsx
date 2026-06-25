@@ -104,7 +104,6 @@ export function PyqList({ teacherId, hideUpload = false }: { teacherId: number, 
                       </p>
                     </div>
                     {items.map((pyq: any) => (
-                    {items.map((pyq: any) => (
                       <div key={pyq.id} className="relative group/pyq">
                         <a
                           href={pyq.fileUrl}
