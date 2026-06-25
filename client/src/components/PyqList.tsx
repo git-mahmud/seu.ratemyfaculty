@@ -100,7 +100,7 @@ export function PyqList({ teacherId, hideUpload = false }: { teacherId: number, 
                         lineHeight:1.6,
                         margin:0,
                       }}>
-                        PYQ files are hosted on Google Drive. Make sure you are signed in with your <strong style={{ color:"rgba(0,200,255,1)" }}>@seu.edu.bd</strong> email in Google to access them.
+                        Make sure you are using your <strong style={{ color:"rgba(0,200,255,1)" }}>@seu.edu.bd</strong> email to access them.
                       </p>
                     </div>
                     {items.map((pyq: any) => (
