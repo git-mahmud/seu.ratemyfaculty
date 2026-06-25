@@ -100,7 +100,7 @@ export function PyqList({ teacherId, hideUpload = false }: { teacherId: number, 
                         lineHeight:1.6,
                         margin:0,
                       }}>
-                        Make sure you are using your <strong style={{ color:"rgba(0,200,255,1)" }}>@seu.edu.bd</strong> email to access them.
+                        Make sure that you are using your <strong style={{ color:"rgba(0,200,255,1)" }}>@seu.edu.bd</strong> email to access them.
                       </p>
                     </div>
                     {items.map((pyq: any) => (
