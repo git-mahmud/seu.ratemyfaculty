@@ -234,8 +234,9 @@ function StatPill({ icon, value, label }: { icon: React.ReactNode; value: number
       gap: "10px",
       padding: "12px 16px",
       borderRadius: "14px",
-      background: "hsl(228 30% 16%)",
-      border: "1px solid hsl(var(--hero-text) / 0.12)",
+      background: "hsl(230 22% 22%)",
+      border: "1px solid hsl(var(--hero-text) / 0.15)",
+      boxShadow: "0 4px 14px hsl(0 0% 0% / 0.25)",
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
