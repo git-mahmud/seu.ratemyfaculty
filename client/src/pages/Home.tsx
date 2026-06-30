@@ -50,24 +50,24 @@ export default function Home() {
               overflow: "hidden",
               borderRadius: "24px",
               border: "1px solid hsl(var(--border))",
-              background: "linear-gradient(150deg, hsl(var(--hero-1)) 0%, hsl(var(--hero-2)) 35%, hsl(var(--hero-3)) 65%, hsl(var(--hero-4)) 100%)",
+              background: "linear-gradient(150deg, hsl(228 35% 11%) 0%, hsl(245 30% 13%) 40%, hsl(255 28% 14%) 70%, hsl(228 35% 11%) 100%)",
               padding: "48px 40px",
             }}
           >
             {/* Grid lines */}
             <div style={{
               position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-              backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.12) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.12) 1px, transparent 1px)",
+              backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.04) 1px, transparent 1px)",
               backgroundSize: "32px 32px",
             }} />
             {/* Soft accent glow blobs */}
             <div style={{
               position: "absolute", top: "-80px", right: "-80px", width: "340px", height: "340px",
-              borderRadius: "50%", background: "hsl(250 85% 65% / 0.3)", filter: "blur(80px)", pointerEvents: "none",
+              borderRadius: "50%", background: "hsl(250 85% 65% / 0.14)", filter: "blur(90px)", pointerEvents: "none",
             }} />
             <div style={{
               position: "absolute", bottom: "-110px", left: "5%", width: "300px", height: "300px",
-              borderRadius: "50%", background: "hsl(285 80% 60% / 0.28)", filter: "blur(80px)", pointerEvents: "none",
+              borderRadius: "50%", background: "hsl(285 80% 60% / 0.12)", filter: "blur(90px)", pointerEvents: "none",
             }} />
 
             <div className="relative" style={{ zIndex: 2, maxWidth: "640px" }}>
@@ -234,8 +234,8 @@ function StatPill({ icon, value, label }: { icon: React.ReactNode; value: number
       gap: "10px",
       padding: "12px 16px",
       borderRadius: "14px",
-      background: "hsl(var(--hero-text) / 0.05)",
-      border: "1px solid hsl(var(--hero-text) / 0.1)",
+      background: "hsl(228 30% 16%)",
+      border: "1px solid hsl(var(--hero-text) / 0.12)",
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
