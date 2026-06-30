@@ -36,7 +36,7 @@ export default function Home() {
   const totalReviews = teachers?.reduce((sum, t) => sum + t.reviewCount, 0) ?? 0;
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "hsl(var(--background))" }}>
+    <div className="flex flex-col min-h-screen">
       <Navbar search={search} onSearch={(v) => { setSearch(v); setVisibleCount(INITIAL_SIZE); }} />
 
       <main className="flex-1 relative z-10">
