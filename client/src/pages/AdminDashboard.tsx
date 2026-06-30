@@ -7,7 +7,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Loader2, Pencil, Trash2, LayoutDashboard, Users, Shield } from "lucide-react";
+import { Loader2, Pencil, Trash2, LayoutDashboard, Users, Shield, Search } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
@@ -17,10 +17,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 
-const sciFiPanel = {
-  background: "rgba(2,10,25,0.85)",
-  border: "1px solid rgba(0,200,255,0.15)",
-  backdropFilter: "blur(12px)",
+const panelStyle = {
+  background: "hsl(var(--card))",
+  border: "1px solid hsl(var(--border))",
+  borderRadius: "var(--radius)",
   position: "relative" as const,
 };
 
@@ -30,6 +30,7 @@ export default function AdminDashboard() {
   const { data: teachers, isLoading: teachersLoading } = useTeachers();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [search, setSearch] = useState("");
 
   const isAdmin = user?.role === "admin";
   const isModerator = user?.role === "moderator";
@@ -48,8 +49,8 @@ export default function AdminDashboard() {
   });
 
   if (authLoading) return (
-    <div className="flex h-screen items-center justify-center" style={{ background: "hsl(220,30%,4%)" }}>
-      <Loader2 className="animate-spin" style={{ color: "rgba(0,200,255,0.7)" }} />
+    <div className="flex h-screen items-center justify-center" style={{ background: "hsl(var(--background))" }}>
+      <Loader2 className="animate-spin" style={{ color: "hsl(var(--primary))" }} />
     </div>
   );
 
@@ -58,81 +59,56 @@ export default function AdminDashboard() {
     return null;
   }
 
+  const filteredTeachers = [...(teachers ?? [])]
+    .filter(t => t.fullName.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.fullName.localeCompare(b.fullName));
+
   return (
-    <div className="min-h-screen" style={{ background: "hsl(220,30%,4%)" }}>
+    <div className="min-h-screen" style={{ background: "hsl(var(--background))" }}>
       <Navbar />
 
-      {/* Top glow line */}
-      <div style={{ height:"1px", background:"linear-gradient(90deg,transparent,rgba(0,200,255,0.4),transparent)" }} />
-
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8" style={{ maxWidth: "1300px" }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+
           {/* LEFT: ICON AND TITLE GROUP */}
           <div className="flex items-center gap-4">
             <div style={{
-              width:"48px", height:"48px", display:"flex", alignItems:"center", justifyContent:"center",
-              background:"rgba(0,200,255,0.08)", border:"1px solid rgba(0,200,255,0.3)",
-              boxShadow:"0 0 15px rgba(0,200,255,0.15)", position:"relative",
+              width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center",
+              background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.3)",
+              borderRadius: "14px",
             }}>
-              <div style={{ position:"absolute",top:"-1px",left:"-1px",width:"6px",height:"6px",borderTop:"2px solid rgba(0,200,255,0.8)",borderLeft:"2px solid rgba(0,200,255,0.8)" }} />
-              <div style={{ position:"absolute",bottom:"-1px",right:"-1px",width:"6px",height:"6px",borderBottom:"2px solid rgba(0,200,255,0.8)",borderRight:"2px solid rgba(0,200,255,0.8)" }} />
-              <LayoutDashboard style={{ width:"22px", height:"22px", color:"rgba(0,200,255,0.9)" }} />
+              <LayoutDashboard style={{ width: "22px", height: "22px", color: "hsl(var(--primary))" }} />
             </div>
             <div>
-              <div style={{ fontFamily:"var(--font-mono)",fontSize:"0.85rem",letterSpacing:"0.2em",color:"rgba(0,200,255,0.85)",textTransform:"uppercase",marginBottom:"2px" }}>
-                 Control Panel
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: "0.7rem", letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", marginBottom: "2px", fontWeight: 600 }}>
+                Control Panel
               </div>
-              <h1 style={{ fontFamily:"var(--font-display)",fontSize:"1.6rem",fontWeight:800,letterSpacing:"0.1em",textTransform:"uppercase",color:"rgba(200,230,255,0.95)" }}>
+              <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.6rem", fontWeight: 800, color: "hsl(var(--foreground))" }}>
                 Dashboard
               </h1>
-              <p style={{ fontFamily:"var(--font-mono)",fontSize:"0.65rem",color:"rgba(0,200,255,0.4)",letterSpacing:"0.05em" }}>
+              <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))" }}>
                 Manage faculty and platform content
               </p>
             </div>
           </div>
 
-          {/* CENTER: THE FACULTY COUNT (This fills the empty space) */}
-          <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "20px",
-              padding: "12px 24px",
-              background: "rgba(0, 200, 255, 0.03)",
-              borderLeft: "1px solid rgba(0, 200, 255, 0.2)",
-              borderRight: "1px solid rgba(0, 200, 255, 0.2)",
-              position: "relative",
-            }}>
-              <div style={{ 
-                position: "absolute", top: 0, left: "10%", right: "10%", height: "1px", 
-                background: "linear-gradient(90deg, transparent, rgba(0,255,255,0.5), transparent)" 
-              }} />
-              
-              <div className="flex flex-col items-end">
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", color: "rgba(0, 200, 255, 0.4)", textTransform: "uppercase", letterSpacing: "0.2em" }}>
-                  System_Status
-                </span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#00FBFF", textTransform: "uppercase" }}>
-                  Active_Node
-                </span>
-              </div>
-
-              <div style={{ width: "1px", height: "30px", background: "rgba(0, 200, 255, 0.1)" }} />
-
-              <div className="flex items-center gap-4">
-                <Users style={{ width: "20px", height: "20px", color: "rgba(0, 200, 255, 0.8)" }} />
-                <div className="flex flex-col">
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.55rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0, 200, 255, 0.5)" }}>
-                    Total_Faculty
-                  </span>
-                  <span style={{ fontFamily: "var(--font-display)", fontSize: "1.8rem", fontWeight: 800, color: "#E0F2FE", lineHeight: 1, textShadow: "0 0 15px rgba(0, 251, 255, 0.4)" }}>
-                    {teachersLoading ? "--" : String(teachers?.length).padStart(3, '0')}
-                  </span>
-                </div>
-              </div>
+          {/* CENTER: FACULTY COUNT PILL */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: "16px",
+            padding: "10px 20px", borderRadius: "14px",
+            background: "hsl(var(--primary) / 0.06)",
+            border: "1px solid hsl(var(--primary) / 0.18)",
+          }}>
+            <Users style={{ width: "20px", height: "20px", color: "hsl(var(--primary))" }} />
+            <div className="flex flex-col">
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", fontWeight: 600 }}>
+                Total Faculty
+              </span>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 800, color: "hsl(var(--foreground))", lineHeight: 1 }}>
+                {teachersLoading ? "--" : String(teachers?.length).padStart(3, '0')}
+              </span>
             </div>
           </div>
 
@@ -143,19 +119,19 @@ export default function AdminDashboard() {
         {/* Tabs */}
         <Tabs defaultValue="teachers" className="space-y-6">
           <TabsList style={{
-            background:"rgba(0,10,25,0.8)",border:"1px solid rgba(0,200,255,0.15)",
-            borderRadius:0, padding:"4px", gap:"4px",
+            background: "hsl(var(--secondary))", border: "1px solid hsl(var(--border))",
+            borderRadius: "12px", padding: "4px", gap: "4px",
           }}>
             <TabsTrigger
               value="teachers"
-              style={{ fontFamily:"var(--font-mono)",fontSize:"0.7rem",letterSpacing:"0.1em",textTransform:"uppercase",borderRadius:0 }}
+              style={{ fontFamily: "var(--font-sans)", fontSize: "0.8rem", fontWeight: 600, borderRadius: "8px" }}
             >
               Faculty
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger
                 value="roles"
-                style={{ fontFamily:"var(--font-mono)",fontSize:"0.7rem",letterSpacing:"0.1em",textTransform:"uppercase",borderRadius:0 }}
+                style={{ fontFamily: "var(--font-sans)", fontSize: "0.8rem", fontWeight: 600, borderRadius: "8px" }}
               >
                 User Roles
               </TabsTrigger>
@@ -163,17 +139,34 @@ export default function AdminDashboard() {
           </TabsList>
 
           {/* Teachers Tab */}
-          <TabsContent value="teachers">
-            <div style={sciFiPanel}>
-              {/* Corner brackets */}
-              <div style={{ position:"absolute",top:"-1px",left:"-1px",width:"10px",height:"10px",borderTop:"2px solid rgba(0,200,255,0.5)",borderLeft:"2px solid rgba(0,200,255,0.5)" }} />
-              <div style={{ position:"absolute",bottom:"-1px",right:"-1px",width:"10px",height:"10px",borderBottom:"2px solid rgba(0,200,255,0.5)",borderRight:"2px solid rgba(0,200,255,0.5)" }} />
+          <TabsContent value="teachers" className="space-y-4">
 
+            {/* Search bar */}
+            <div className="relative" style={{ maxWidth: "420px" }}>
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "hsl(var(--muted-foreground))" }} />
+              <input
+                type="text"
+                placeholder="Search faculty by name to edit or delete"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                style={{
+                  width: "100%",
+                  paddingLeft: "40px",
+                  paddingRight: "16px",
+                  paddingTop: "11px",
+                  paddingBottom: "11px",
+                  fontSize: "0.85rem",
+                  borderRadius: "12px",
+                }}
+              />
+            </div>
+
+            <div style={panelStyle}>
               <Table>
                 <TableHeader>
-                  <TableRow style={{ borderBottom:"1px solid rgba(0,200,255,0.1)" }}>
-                    {["Name","Department","University","Reviews","Actions"].map((h, i) => (
-                      <TableHead key={i} style={{ fontFamily:"var(--font-mono)",fontSize:"0.75rem",letterSpacing:"0.15em",textTransform:"uppercase",color:"rgba(0,200,255,0.85)",padding:"14px 16px" }}>
+                  <TableRow style={{ borderBottom: "1px solid hsl(var(--border))" }}>
+                    {["Name", "Department", "University", "Reviews", "Actions"].map((h, i) => (
+                      <TableHead key={i} style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "hsl(var(--muted-foreground))", fontWeight: 700, padding: "14px 16px" }}>
                         {h}
                       </TableHead>
                     ))}
@@ -183,47 +176,47 @@ export default function AdminDashboard() {
                   {teachersLoading ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-12">
-                        <Loader2 className="h-6 w-6 animate-spin mx-auto" style={{ color:"rgba(0,200,255,0.5)" }} />
+                        <Loader2 className="h-6 w-6 animate-spin mx-auto" style={{ color: "hsl(var(--primary))" }} />
                       </TableCell>
                     </TableRow>
-                  ) : teachers?.length === 0 ? (
+                  ) : filteredTeachers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-12" style={{ fontFamily:"var(--font-mono)",fontSize:"0.75rem",color:"rgba(0,200,255,0.3)",letterSpacing:"0.1em" }}>
-                        // NO FACULTY FOUND
+                      <TableCell colSpan={5} className="text-center py-12" style={{ fontFamily: "var(--font-sans)", fontSize: "0.85rem", color: "hsl(var(--muted-foreground))" }}>
+                        {search ? "No faculty matches your search" : "No faculty found"}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    [...(teachers ?? [])].sort((a, b) => a.fullName.localeCompare(b.fullName)).map((teacher) => (
+                    filteredTeachers.map((teacher) => (
                       <TableRow
                         key={teacher.id}
-                        style={{ borderBottom:"1px solid rgba(0,200,255,0.06)", transition:"background 0.2s ease" }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgba(0,200,255,0.03)"}
+                        style={{ borderBottom: "1px solid hsl(var(--border))", transition: "background 0.2s ease" }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.04)"}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                       >
-                        <TableCell style={{ fontFamily:"var(--font-sans)",fontWeight:600,fontSize:"0.85rem",color:"rgba(200,230,255,0.9)",padding:"12px 16px" }}>
+                        <TableCell style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: "0.85rem", color: "hsl(var(--foreground))", padding: "12px 16px" }}>
                           {teacher.fullName}
                         </TableCell>
-                        <TableCell style={{ fontFamily:"var(--font-mono)",fontSize:"0.72rem",color:"rgba(0,200,255,0.6)",letterSpacing:"0.03em",padding:"12px 16px" }}>
+                        <TableCell style={{ fontFamily: "var(--font-sans)", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", padding: "12px 16px" }}>
                           {teacher.department}
                         </TableCell>
-                        <TableCell style={{ fontFamily:"var(--font-mono)",fontSize:"0.72rem",color:"rgba(0,200,255,0.4)",letterSpacing:"0.03em",padding:"12px 16px" }}>
+                        <TableCell style={{ fontFamily: "var(--font-sans)", fontSize: "0.8rem", color: "hsl(var(--muted-foreground))", padding: "12px 16px" }}>
                           {teacher.university}
                         </TableCell>
-                        <TableCell style={{ padding:"12px 16px" }}>
+                        <TableCell style={{ padding: "12px 16px" }}>
                           <span style={{
-                            fontFamily:"var(--font-mono)",fontSize:"0.65rem",letterSpacing:"0.1em",
-                            color:"rgba(0,200,255,0.8)",background:"rgba(0,200,255,0.08)",
-                            border:"1px solid rgba(0,200,255,0.2)",padding:"2px 10px",
+                            fontFamily: "var(--font-sans)", fontSize: "0.72rem", fontWeight: 600,
+                            color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.1)",
+                            border: "1px solid hsl(var(--primary) / 0.2)", borderRadius: "999px", padding: "3px 12px",
                           }}>
                             {teacher.reviewCount}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right space-x-1" style={{ padding:"12px 16px" }}>
+                        <TableCell className="text-right space-x-1" style={{ padding: "12px 16px" }}>
                           <TeacherForm
                             teacher={teacher}
                             trigger={
                               <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Pencil className="h-4 w-4" style={{ color:"rgba(0,200,255,0.6)" }} />
+                                <Pencil className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
                               </Button>
                             }
                           />
@@ -236,7 +229,7 @@ export default function AdminDashboard() {
                                 }
                               }}
                             >
-                              <Trash2 className="h-4 w-4" style={{ color:"rgba(255,80,80,0.7)" }} />
+                              <Trash2 className="h-4 w-4" style={{ color: "hsl(var(--destructive))" }} />
                             </Button>
                           )}
                         </TableCell>
@@ -288,28 +281,22 @@ function UserRolesPanel() {
   });
 
   return (
-    <div style={{ ...sciFiPanel, maxWidth:"480px", padding:"24px" }}>
-      {/* Corner brackets */}
-      <div style={{ position:"absolute",top:"-1px",left:"-1px",width:"10px",height:"10px",borderTop:"2px solid rgba(0,200,255,0.5)",borderLeft:"2px solid rgba(0,200,255,0.5)" }} />
-      <div style={{ position:"absolute",bottom:"-1px",right:"-1px",width:"10px",height:"10px",borderBottom:"2px solid rgba(0,200,255,0.5)",borderRight:"2px solid rgba(0,200,255,0.5)" }} />
-
+    <div style={{ ...panelStyle, maxWidth: "480px", padding: "24px" }}>
       <div className="flex items-center gap-3 mb-6">
-        <Users style={{ width:"18px",height:"18px",color:"rgba(0,200,255,0.7)" }} />
+        <Users style={{ width: "18px", height: "18px", color: "hsl(var(--primary))" }} />
         <div>
-          <div style={{ fontFamily:"var(--font-mono)",fontSize:"0.55rem",letterSpacing:"0.2em",color:"rgba(0,200,255,0.4)",textTransform:"uppercase" }}>
-            // Access Control
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "0.65rem", letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", textTransform: "uppercase", fontWeight: 600 }}>
+            Access Control
           </div>
-          <h2 style={{ fontFamily:"var(--font-display)",fontSize:"1rem",fontWeight:700,letterSpacing:"0.08em",color:"rgba(200,230,255,0.9)",textTransform:"uppercase" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 700, color: "hsl(var(--foreground))" }}>
             User Roles
           </h2>
         </div>
       </div>
 
-      <div style={{ height:"1px",background:"linear-gradient(90deg,rgba(0,200,255,0.3),transparent)",marginBottom:"20px" }} />
-
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label style={{ fontFamily:"var(--font-mono)",fontSize:"0.6rem",letterSpacing:"0.15em",color:"rgba(0,200,255,0.5)",textTransform:"uppercase" }}>
+          <Label style={{ fontFamily: "var(--font-sans)", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", fontWeight: 600 }}>
             User Email
           </Label>
           <Input
@@ -320,38 +307,28 @@ function UserRolesPanel() {
           />
         </div>
         <div className="space-y-2">
-          <Label style={{ fontFamily:"var(--font-mono)",fontSize:"0.6rem",letterSpacing:"0.15em",color:"rgba(0,200,255,0.5)",textTransform:"uppercase" }}>
+          <Label style={{ fontFamily: "var(--font-sans)", fontSize: "0.75rem", color: "hsl(var(--muted-foreground))", fontWeight: 600 }}>
             Role
           </Label>
           <Select value={role} onValueChange={setRole}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent style={{ background:"rgba(2,10,25,0.95)",border:"1px solid rgba(0,200,255,0.2)" }}>
+            <SelectContent>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="moderator">Moderator</SelectItem>
               <SelectItem value="student">Student</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <button
-          className="w-full"
+        <Button
+          className="w-full gap-2"
           disabled={roleMutation.isPending || !email}
           onClick={() => roleMutation.mutate({ email, role })}
-          style={{
-            display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",
-            padding:"10px",marginTop:"8px",
-            background: roleMutation.isPending || !email ? "rgba(0,200,255,0.03)" : "rgba(0,200,255,0.08)",
-            border:"1px solid rgba(0,200,255,0.3)",
-            color: roleMutation.isPending || !email ? "rgba(0,200,255,0.3)" : "rgba(0,200,255,0.9)",
-            fontFamily:"var(--font-mono)",fontSize:"0.7rem",letterSpacing:"0.12em",textTransform:"uppercase",
-            cursor: roleMutation.isPending || !email ? "not-allowed" : "pointer",
-            transition:"all 0.3s ease",
-          }}
         >
-          <Shield style={{ width:"14px",height:"14px" }} />
+          <Shield style={{ width: "14px", height: "14px" }} />
           {roleMutation.isPending ? "Updating..." : "Save Role"}
-        </button>
+        </Button>
       </div>
     </div>
   );
