@@ -26,7 +26,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
         />
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(to top, hsl(var(--card)) 0%, hsl(var(--card) / 0.3) 50%, transparent 100%)",
+          background: "linear-gradient(to top, hsl(0 0% 0% / 0.85) 0%, hsl(0 0% 0% / 0.25) 50%, transparent 100%)",
         }} />
 
         <div style={{ position: "absolute", bottom: "8px", left: "8px", right: "8px" }}>
