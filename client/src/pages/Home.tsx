@@ -50,18 +50,26 @@ export default function Home() {
               overflow: "hidden",
               borderRadius: "24px",
               border: "1px solid hsl(var(--border))",
-              background: "linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.5))",
+              background: "linear-gradient(135deg, hsl(228 35% 9%), hsl(255 35% 14%) 50%, hsl(280 30% 12%))",
               padding: "48px 40px",
             }}
           >
+            {/* Grid lines */}
+            <div style={{
+              position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+              backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.05) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.05) 1px, transparent 1px)",
+              backgroundSize: "36px 36px",
+              maskImage: "radial-gradient(ellipse 75% 75% at 50% 40%, black 30%, transparent 100%)",
+              WebkitMaskImage: "radial-gradient(ellipse 75% 75% at 50% 40%, black 30%, transparent 100%)",
+            }} />
             {/* Soft accent glow blobs */}
             <div style={{
-              position: "absolute", top: "-80px", right: "-80px", width: "280px", height: "280px",
-              borderRadius: "50%", background: "hsl(var(--primary) / 0.15)", filter: "blur(60px)", pointerEvents: "none",
+              position: "absolute", top: "-80px", right: "-80px", width: "320px", height: "320px",
+              borderRadius: "50%", background: "hsl(230 80% 60% / 0.25)", filter: "blur(70px)", pointerEvents: "none",
             }} />
             <div style={{
-              position: "absolute", bottom: "-100px", left: "10%", width: "260px", height: "260px",
-              borderRadius: "50%", background: "hsl(var(--accent) / 0.12)", filter: "blur(60px)", pointerEvents: "none",
+              position: "absolute", bottom: "-100px", left: "10%", width: "280px", height: "280px",
+              borderRadius: "50%", background: "hsl(280 75% 60% / 0.22)", filter: "blur(70px)", pointerEvents: "none",
             }} />
 
             <div className="relative" style={{ zIndex: 2, maxWidth: "640px" }}>
@@ -69,7 +77,10 @@ export default function Home() {
                 display: "inline-flex", alignItems: "center", gap: "6px",
                 padding: "5px 12px", borderRadius: "9999px",
                 marginBottom: "20px",
-              }} className="app-chip">
+                background: "hsl(230 80% 65% / 0.15)",
+                border: "1px solid hsl(230 80% 65% / 0.3)",
+                color: "hsl(230 90% 75%)",
+              }}>
                 <span style={{ fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.03em" }}>
                   SEU Rate My Faculty
                 </span>
@@ -80,17 +91,24 @@ export default function Home() {
                 fontSize: "clamp(2rem, 4.5vw, 3rem)",
                 fontWeight: 800,
                 lineHeight: 1.15,
-                color: "hsl(var(--foreground))",
+                color: "white",
                 marginBottom: "16px",
               }}>
                 Access PYQ and Faculty Review<br />
-                <span className="gradient-text">Anytime, Anywhere</span>
+                <span style={{
+                  background: "linear-gradient(135deg, hsl(220 90% 70%), hsl(280 85% 72%))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>
+                  Anytime, Anywhere
+                </span>
               </h1>
 
               <p style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "1.05rem",
-                color: "hsl(var(--muted-foreground))",
+                color: "hsl(220 15% 75%)",
                 lineHeight: 1.6,
                 marginBottom: "32px",
               }}>
@@ -98,7 +116,7 @@ export default function Home() {
               </p>
 
               {/* Stats row */}
-              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "14px", maxWidth: "520px" }}>
                 <StatPill icon={<MessageSquare className="h-4 w-4" />} value={totalReviews} label="Reviews" />
                 <StatPill icon={<FileText className="h-4 w-4" />} value={STATS.pyqUploaded} label="PYQ Uploaded" />
                 <StatPill icon={<Users className="h-4 w-4" />} value={STATS.usersJoined} label="Users Joined" />
@@ -216,23 +234,23 @@ function StatPill({ icon, value, label }: { icon: React.ReactNode; value: number
       display: "flex",
       alignItems: "center",
       gap: "10px",
-      padding: "10px 16px",
+      padding: "12px 16px",
       borderRadius: "14px",
-      background: "hsl(var(--card))",
-      border: "1px solid hsl(var(--border))",
+      background: "hsl(0 0% 100% / 0.05)",
+      border: "1px solid hsl(0 0% 100% / 0.1)",
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         width: "32px", height: "32px", borderRadius: "10px",
-        background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", flexShrink: 0,
+        background: "hsl(230 80% 65% / 0.18)", color: "hsl(230 90% 75%)", flexShrink: 0,
       }}>
         {icon}
       </div>
       <div>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--foreground))", lineHeight: 1 }}>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, color: "white", lineHeight: 1 }}>
           {value}
         </div>
-        <div style={{ fontSize: "0.7rem", color: "hsl(var(--muted-foreground))", fontWeight: 500, marginTop: "2px" }}>
+        <div style={{ fontSize: "0.7rem", color: "hsl(220 15% 70%)", fontWeight: 500, marginTop: "2px" }}>
           {label}
         </div>
       </div>
