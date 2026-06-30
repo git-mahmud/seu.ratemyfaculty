@@ -75,9 +75,9 @@ export default function Home() {
                 display: "inline-flex", alignItems: "center", gap: "6px",
                 padding: "5px 12px", borderRadius: "9999px",
                 marginBottom: "20px",
-                background: "hsl(230 80% 65% / 0.15)",
-                border: "1px solid hsl(230 80% 65% / 0.3)",
-                color: "hsl(230 90% 75%)",
+                background: "hsl(230 80% 60% / 0.15)",
+                border: "1px solid hsl(230 80% 60% / 0.3)",
+                color: "hsl(var(--primary))",
               }}>
                 <span style={{ fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.03em" }}>
                   SEU Rate My Faculty
@@ -89,7 +89,7 @@ export default function Home() {
                 fontSize: "clamp(2rem, 4.5vw, 3rem)",
                 fontWeight: 800,
                 lineHeight: 1.15,
-                color: "white",
+                color: "hsl(var(--hero-text))",
                 marginBottom: "16px",
               }}>
                 Access PYQ and Faculty Review<br />
@@ -106,7 +106,7 @@ export default function Home() {
               <p style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "1.05rem",
-                color: "hsl(220 15% 75%)",
+                color: "hsl(var(--hero-subtext))",
                 lineHeight: 1.6,
                 marginBottom: "32px",
               }}>
