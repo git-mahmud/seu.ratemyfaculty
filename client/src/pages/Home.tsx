@@ -50,26 +50,24 @@ export default function Home() {
               overflow: "hidden",
               borderRadius: "24px",
               border: "1px solid hsl(var(--border))",
-              background: "linear-gradient(135deg, hsl(228 35% 9%), hsl(255 35% 14%) 50%, hsl(280 30% 12%))",
+              background: "linear-gradient(150deg, hsl(235 45% 10%) 0%, hsl(250 40% 14%) 35%, hsl(265 45% 16%) 65%, hsl(280 40% 13%) 100%)",
               padding: "48px 40px",
             }}
           >
             {/* Grid lines */}
             <div style={{
               position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-              backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.05) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.05) 1px, transparent 1px)",
-              backgroundSize: "36px 36px",
-              maskImage: "radial-gradient(ellipse 75% 75% at 50% 40%, black 30%, transparent 100%)",
-              WebkitMaskImage: "radial-gradient(ellipse 75% 75% at 50% 40%, black 30%, transparent 100%)",
+              backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.12) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.12) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
             }} />
             {/* Soft accent glow blobs */}
             <div style={{
-              position: "absolute", top: "-80px", right: "-80px", width: "320px", height: "320px",
-              borderRadius: "50%", background: "hsl(230 80% 60% / 0.25)", filter: "blur(70px)", pointerEvents: "none",
+              position: "absolute", top: "-80px", right: "-80px", width: "340px", height: "340px",
+              borderRadius: "50%", background: "hsl(250 85% 65% / 0.3)", filter: "blur(80px)", pointerEvents: "none",
             }} />
             <div style={{
-              position: "absolute", bottom: "-100px", left: "10%", width: "280px", height: "280px",
-              borderRadius: "50%", background: "hsl(280 75% 60% / 0.22)", filter: "blur(70px)", pointerEvents: "none",
+              position: "absolute", bottom: "-110px", left: "5%", width: "300px", height: "300px",
+              borderRadius: "50%", background: "hsl(285 80% 60% / 0.28)", filter: "blur(80px)", pointerEvents: "none",
             }} />
 
             <div className="relative" style={{ zIndex: 2, maxWidth: "640px" }}>
