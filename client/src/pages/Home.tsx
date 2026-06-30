@@ -234,21 +234,21 @@ function StatPill({ icon, value, label }: { icon: React.ReactNode; value: number
       gap: "10px",
       padding: "12px 16px",
       borderRadius: "14px",
-      background: "hsl(0 0% 100% / 0.05)",
-      border: "1px solid hsl(0 0% 100% / 0.1)",
+      background: "hsl(var(--hero-text) / 0.05)",
+      border: "1px solid hsl(var(--hero-text) / 0.1)",
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         width: "32px", height: "32px", borderRadius: "10px",
-        background: "hsl(230 80% 65% / 0.18)", color: "hsl(230 90% 75%)", flexShrink: 0,
+        background: "hsl(230 80% 60% / 0.18)", color: "hsl(var(--primary))", flexShrink: 0,
       }}>
         {icon}
       </div>
       <div>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, color: "white", lineHeight: 1 }}>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 800, color: "hsl(var(--hero-text))", lineHeight: 1 }}>
           {value}
         </div>
-        <div style={{ fontSize: "0.7rem", color: "hsl(220 15% 70%)", fontWeight: 500, marginTop: "2px" }}>
+        <div style={{ fontSize: "0.7rem", color: "hsl(var(--hero-subtext))", fontWeight: 500, marginTop: "2px" }}>
           {label}
         </div>
       </div>
