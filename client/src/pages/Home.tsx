@@ -50,7 +50,7 @@ export default function Home() {
               overflow: "hidden",
               borderRadius: "24px",
               border: "1px solid hsl(var(--border))",
-              background: "linear-gradient(150deg, hsl(228 35% 11%) 0%, hsl(245 30% 13%) 40%, hsl(255 28% 14%) 70%, hsl(228 35% 11%) 100%)",
+              background: "linear-gradient(150deg, hsl(var(--hero-1)) 0%, hsl(var(--hero-2)) 35%, hsl(var(--hero-3)) 65%, hsl(var(--hero-4)) 100%)",
               padding: "48px 40px",
             }}
           >
