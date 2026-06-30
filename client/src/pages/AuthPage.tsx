@@ -25,71 +25,58 @@ export default function AuthPage() {
   const error = params.get("error");
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ background: "hsl(220,30%,4%)" }}>
-
-      {/* Nebula blobs */}
-      <div style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",
-        background:"radial-gradient(ellipse 60% 50% at 30% 40%,rgba(0,80,200,0.07) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 70% 60%,rgba(100,0,200,0.06) 0%,transparent 60%)" }} />
-
-      {/* Grid */}
-      <div style={{ position:"fixed",inset:0,zIndex:0,pointerEvents:"none",
-        backgroundImage:"linear-gradient(rgba(0,200,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.025) 1px,transparent 1px)",
-        backgroundSize:"60px 60px" }} />
+    <div className="min-h-screen flex flex-col relative" style={{ background: "hsl(var(--background))" }}>
 
       {/* Center content */}
-      <div className="flex-1 flex items-center justify-center p-4" style={{ zIndex:1, position:"relative" }}>
+      <div className="flex-1 flex items-center justify-center p-4" style={{ zIndex: 1, position: "relative" }}>
         <div style={{
-          position:"relative", width:"100%", maxWidth:"420px",
-          background:"rgba(2,10,25,0.9)",
-          border:"1px solid rgba(0,200,255,0.2)",
-          backdropFilter:"blur(20px)",
-          boxShadow:"0 0 60px rgba(0,0,0,0.8),0 0 30px rgba(0,200,255,0.06)",
-          padding:"40px 32px",
-          textAlign:"center",
+          position: "relative", width: "100%", maxWidth: "420px",
+          background: "hsl(var(--card))",
+          border: "1px solid hsl(var(--border))",
+          borderRadius: "24px",
+          boxShadow: "0 8px 40px hsl(var(--hero-text) / 0.1)",
+          padding: "40px 32px",
+          textAlign: "center",
         }}>
-          {/* Corner brackets */}
-          <div style={{ position:"absolute",top:"-2px",left:"-2px",width:"16px",height:"16px",borderTop:"2px solid rgba(0,200,255,0.7)",borderLeft:"2px solid rgba(0,200,255,0.7)" }} />
-          <div style={{ position:"absolute",top:"-2px",right:"-2px",width:"16px",height:"16px",borderTop:"2px solid rgba(0,200,255,0.7)",borderRight:"2px solid rgba(0,200,255,0.7)" }} />
-          <div style={{ position:"absolute",bottom:"-2px",left:"-2px",width:"16px",height:"16px",borderBottom:"2px solid rgba(0,200,255,0.7)",borderLeft:"2px solid rgba(0,200,255,0.7)" }} />
-          <div style={{ position:"absolute",bottom:"-2px",right:"-2px",width:"16px",height:"16px",borderBottom:"2px solid rgba(0,200,255,0.7)",borderRight:"2px solid rgba(0,200,255,0.7)" }} />
-
-          {/* Top scanner line */}
-          <div style={{ position:"absolute",top:0,left:0,right:0,height:"1px",background:"linear-gradient(90deg,transparent,rgba(0,200,255,0.8),transparent)" }} />
 
           {/* Icon */}
           <div style={{
-            width:"64px",height:"64px",margin:"0 auto 20px",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            background:"rgba(0,200,255,0.08)",border:"1px solid rgba(0,200,255,0.3)",
-            boxShadow:"0 0 20px rgba(0,200,255,0.15)",position:"relative",
+            width: "64px", height: "64px", margin: "0 auto 20px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.3)",
+            borderRadius: "16px",
           }}>
-            <div style={{ position:"absolute",top:"-2px",left:"-2px",width:"8px",height:"8px",borderTop:"2px solid rgba(0,200,255,0.8)",borderLeft:"2px solid rgba(0,200,255,0.8)" }} />
-            <div style={{ position:"absolute",bottom:"-2px",right:"-2px",width:"8px",height:"8px",borderBottom:"2px solid rgba(0,200,255,0.8)",borderRight:"2px solid rgba(0,200,255,0.8)" }} />
-            <GraduationCap style={{ width:"30px",height:"30px",color:"rgba(0,200,255,0.9)" }} />
+            <GraduationCap style={{ width: "30px", height: "30px", color: "hsl(var(--primary))" }} />
           </div>
 
           {/* Title */}
           <h1 style={{
-            fontFamily:"var(--font-display)",fontSize:"1.5rem",fontWeight:800,
-            letterSpacing:"0.1em",textTransform:"uppercase",
-            background:"linear-gradient(135deg,#00e5ff 0%,#ffffff 50%,#a855f7 100%)",
-            WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",
-            marginBottom:"8px",
+            fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 800,
+            color: "hsl(var(--foreground))",
+            marginBottom: "8px",
           }}>
-            Rate My Faculty
+            Rate My{" "}
+            <span style={{
+              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              Faculty
+            </span>
           </h1>
 
-          <p style={{ fontFamily:"var(--font-mono)",fontSize:"0.78rem",color:"rgba(0,200,255,0.5)",letterSpacing:"0.05em",marginBottom:"32px" }}>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.85rem", color: "hsl(var(--muted-foreground))", marginBottom: "32px" }}>
             Sign in with your SEU Google account
           </p>
 
           {/* Error message */}
           {error === "not_seu_email" && (
             <div style={{
-              background:"rgba(255,80,80,0.1)",border:"1px solid rgba(255,80,80,0.3)",
-              padding:"10px 16px",marginBottom:"20px",
-              fontFamily:"var(--font-mono)",fontSize:"0.72rem",color:"rgba(255,80,80,0.9)",
-              letterSpacing:"0.05em",
+              background: "hsl(var(--destructive) / 0.1)", border: "1px solid hsl(var(--destructive) / 0.3)",
+              borderRadius: "12px",
+              padding: "10px 16px", marginBottom: "20px",
+              fontFamily: "var(--font-sans)", fontSize: "0.8rem", color: "hsl(var(--destructive))",
             }}>
               ⚠ Only @seu.edu.bd emails are allowed
             </div>
@@ -99,25 +86,22 @@ export default function AuthPage() {
           <button
             onClick={handleGoogleLogin}
             style={{
-              display:"flex",alignItems:"center",justifyContent:"center",gap:"12px",
-              width:"100%",padding:"14px",
-              background:"rgba(255,255,255,0.05)",
-              border:"1px solid rgba(0,200,255,0.3)",
-              color:"rgba(220,240,255,0.9)",
-              fontFamily:"var(--font-mono)",fontSize:"0.82rem",
-              letterSpacing:"0.08em",textTransform:"uppercase",
-              cursor:"pointer",transition:"all 0.3s ease",
-              boxShadow:"0 0 15px rgba(0,200,255,0.08)",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
+              width: "100%", padding: "14px",
+              background: "hsl(var(--secondary))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "14px",
+              color: "hsl(var(--foreground))",
+              fontFamily: "var(--font-sans)", fontSize: "0.88rem", fontWeight: 600,
+              cursor: "pointer", transition: "all 0.2s ease",
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(0,200,255,0.1)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 25px rgba(0,200,255,0.2)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,200,255,0.6)";
+              (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--primary) / 0.5)";
+              (e.currentTarget as HTMLElement).style.background = "hsl(var(--primary) / 0.06)";
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 0 15px rgba(0,200,255,0.08)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,200,255,0.3)";
+              (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border))";
+              (e.currentTarget as HTMLElement).style.background = "hsl(var(--secondary))";
             }}
           >
             {/* Google Icon */}
@@ -131,13 +115,13 @@ export default function AuthPage() {
           </button>
 
           {/* Footer note */}
-          <p style={{ fontFamily:"var(--font-mono)",fontSize:"0.65rem",color:"rgba(0,200,255,0.3)",letterSpacing:"0.08em",marginTop:"24px" }}>
+          <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", color: "hsl(var(--muted-foreground))", marginTop: "24px" }}>
             Only @seu.edu.bd emails are authorized
           </p>
         </div>
       </div>
 
-      <div style={{ position:"relative",zIndex:1 }}>
+      <div style={{ position: "relative", zIndex: 1 }}>
         <Footer />
       </div>
     </div>
