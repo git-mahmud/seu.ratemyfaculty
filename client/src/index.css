@@ -39,7 +39,7 @@
 }
 
 .dark {
-  --background: 230 30% 7%;
+  --background: 252 45% 8%;
   --foreground: 220 25% 95%;
   --card: 228 28% 11%;
   --card-foreground: 220 25% 95%;
@@ -91,9 +91,9 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 50% at 15% 10%, hsl(var(--primary) / 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 90% 30%, hsl(var(--accent) / 0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 50% 100%, hsl(var(--accent) / 0.06) 0%, transparent 70%);
+    radial-gradient(ellipse 70% 50% at 15% 10%, hsl(var(--primary) / 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 90% 30%, hsl(var(--accent) / 0.24) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, hsl(var(--accent) / 0.18) 0%, transparent 70%);
 }
 
 #root {
