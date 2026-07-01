@@ -40,7 +40,7 @@ export default function AuthPage() {
         }}>
 
           {/* Icon */}
-          <div style={{
+          <div className="glow-card" style={{
             width: "64px", height: "64px", margin: "0 auto 20px",
             display: "flex", alignItems: "center", justifyContent: "center",
             background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.3)",
