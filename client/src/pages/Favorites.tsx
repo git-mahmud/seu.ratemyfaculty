@@ -14,38 +14,48 @@ export default function Favorites() {
   ) ?? [];
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "hsl(220,30%,4%)" }}>
+    <div className="flex flex-col min-h-screen" style={{ background: "hsl(var(--background))" }}>
       <Navbar />
 
-      <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
+      <main className="flex-1 container mx-auto px-4 py-8">
+
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Heart className="h-6 w-6" style={{ color:"rgba(255,80,120,0.9)" }} />
-          <h1 style={{ fontFamily:"var(--font-display)",fontSize:"1.6rem",fontWeight:800,letterSpacing:"0.1em",textTransform:"uppercase",color:"rgba(200,230,255,0.95)" }}>
+        <div className="flex items-center gap-3 mb-6">
+          <Heart className="h-5 w-5" style={{ color: "hsl(0 70% 60%)" }} fill="hsl(0 70% 60%)" />
+          <h1 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "1.5rem",
+            fontWeight: 800,
+            color: "hsl(var(--foreground))",
+          }}>
             My Favorites
           </h1>
         </div>
 
         {/* Divider */}
-        <div style={{ height:"1px",background:"linear-gradient(90deg,rgba(0,200,255,0.3),transparent)",marginBottom:"24px" }} />
+        <div style={{ height: "1px", background: "hsl(var(--border))", marginBottom: "24px" }} />
 
+        {/* Content */}
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
             {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="aspect-[4/5] animate-pulse rounded-sm"
-                style={{ background:"rgba(0,200,255,0.05)",border:"1px solid rgba(0,200,255,0.1)" }} />
+              <div key={i} className="aspect-[4/5] animate-pulse"
+                style={{ background: "hsl(var(--muted))", borderRadius: "var(--radius)" }} />
             ))}
           </div>
         ) : favoriteTeachers.length === 0 ? (
-          <div className="text-center py-20" style={{
-            border:"1px dashed rgba(0,200,255,0.35)",
-            background:"rgba(0,200,255,0.02)",
-          }}>
-            <Heart className="h-12 w-12 mx-auto mb-4" style={{ color:"rgba(255,80,120,0.8)" }} />
-            <p style={{ fontFamily:"var(--font-display)",fontSize:"1rem",color:"rgba(0,200,255,0.85)",letterSpacing:"0.1em",textTransform:"uppercase" }}>
+          <div className="text-center py-20 app-card" style={{ borderStyle: "dashed" }}>
+            <Heart className="h-10 w-10 mx-auto mb-4" style={{ color: "hsl(0 70% 70%)" }} />
+            <p style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "1rem",
+              fontWeight: 700,
+              color: "hsl(var(--foreground))",
+              marginBottom: "8px",
+            }}>
               No favorites yet
             </p>
-            <p style={{ fontFamily:"var(--font-mono)",fontSize:"0.75rem",color:"rgba(0,200,255,0.6)",marginTop:"8px" }}>
+            <p style={{ fontSize: "0.82rem", color: "hsl(var(--muted-foreground))" }}>
               Click the ❤️ on any faculty profile to add them here
             </p>
           </div>
