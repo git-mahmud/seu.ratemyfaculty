@@ -10,7 +10,6 @@ function AnimatedName({ text }: { text: string }) {
     const el = containerRef.current;
     if (!el) return;
 
-    // Magnetic wave animation on interval
     let frame: number;
     let startTime: number | null = null;
     const duration = 1200;
@@ -33,7 +32,6 @@ function AnimatedName({ text }: { text: string }) {
       if (progress < 1) {
         frame = requestAnimationFrame(animate);
       } else {
-        // Reset all letters
         letters.forEach((letter) => {
           letter.style.transform = "translateY(0) scale(1)";
           letter.style.opacity = "1";
@@ -42,13 +40,11 @@ function AnimatedName({ text }: { text: string }) {
       }
     };
 
-    // Run wave animation every 4 seconds
     const interval = setInterval(() => {
       startTime = null;
       frame = requestAnimationFrame(animate);
     }, 4000);
 
-    // Initial animation after short delay
     const initialTimeout = setTimeout(() => {
       frame = requestAnimationFrame(animate);
     }, 1000);
@@ -86,9 +82,7 @@ function AnimatedName({ text }: { text: string }) {
             fontWeight: 800,
             letterSpacing: "0.02em",
             transition: `transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.03}s`,
-            transform: isHovered
-              ? "translateY(-2px)"
-              : "translateY(0)",
+            transform: isHovered ? "translateY(-2px)" : "translateY(0)",
           }}
         >
           {char}
@@ -97,6 +91,27 @@ function AnimatedName({ text }: { text: string }) {
     </span>
   );
 }
+
+/* ─── Reusable link style ─── */
+const linkStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: "0.8rem",
+  color: "hsl(var(--muted-foreground))",
+  textDecoration: "none",
+  transition: "color 0.2s ease",
+  cursor: "pointer",
+  lineHeight: 1.8,
+};
+
+const columnHeadingStyle: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontSize: "0.75rem",
+  fontWeight: 700,
+  color: "hsl(var(--foreground))",
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  marginBottom: "12px",
+};
 
 export function Footer() {
   const scrollToTop = () => {
@@ -112,139 +127,188 @@ export function Footer() {
         backdropFilter: "blur(8px)",
       }}
     >
-      <div className="container mx-auto px-4">
-        {/* Main footer content */}
+      <div className="container mx-auto px-6 sm:px-8">
+        {/* ═══ Main 3-Column Grid ═══ */}
         <div
-          className="py-8 flex flex-col sm:flex-row items-center justify-between gap-6"
+          className="py-10 sm:py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-8"
         >
-          {/* Left - Brand */}
-          <div className="flex items-center gap-3">
-            <div
+          {/* Column 1 — Brand / About */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.15))",
+                  border: "1px solid hsl(var(--primary) / 0.2)",
+                  flexShrink: 0,
+                }}
+              >
+                <GraduationCap className="h-4.5 w-4.5" style={{ color: "hsl(var(--primary))" }} />
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "0.95rem",
+                    fontWeight: 800,
+                    color: "hsl(var(--foreground))",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Rate My <span className="gradient-text">Faculty</span>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.68rem",
+                    color: "hsl(var(--muted-foreground))",
+                    marginTop: "2px",
+                  }}
+                >
+                  Southeast University
+                </div>
+              </div>
+            </div>
+            <p
               style={{
-                width: "32px",
-                height: "32px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.15))",
-                border: "1px solid hsl(var(--primary) / 0.2)",
+                fontFamily: "var(--font-sans)",
+                fontSize: "0.78rem",
+                color: "hsl(var(--muted-foreground))",
+                lineHeight: 1.6,
+                maxWidth: "280px",
               }}
             >
-              <GraduationCap className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
+              An open platform for SEU students to share honest faculty reviews
+              and access previous year questions — helping you make informed decisions.
+            </p>
+          </div>
+
+          {/* Column 2 — Navigation & Resources */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <h4 style={columnHeadingStyle}>Navigate</h4>
+              <div className="flex flex-col">
+                <Link href="/">
+                  <span className="footer-link" style={linkStyle}>Home</span>
+                </Link>
+                <Link href="/auth">
+                  <span className="footer-link" style={linkStyle}>Sign In</span>
+                </Link>
+                <Link href="/favorites">
+                  <span className="footer-link" style={linkStyle}>Favorites</span>
+                </Link>
+              </div>
             </div>
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                  color: "hsl(var(--foreground))",
-                  lineHeight: 1.2,
-                }}
-              >
-                Rate My <span className="gradient-text">Faculty</span>
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.65rem",
-                  color: "hsl(var(--muted-foreground))",
-                  marginTop: "1px",
-                }}
-              >
-                Southeast University
+              <h4 style={columnHeadingStyle}>Resources</h4>
+              <div className="flex flex-col">
+                <span className="footer-link" style={{ ...linkStyle, opacity: 0.6, cursor: "default" }}>
+                  About
+                </span>
+                <span className="footer-link" style={{ ...linkStyle, opacity: 0.6, cursor: "default" }}>
+                  Privacy Policy
+                </span>
+                <span className="footer-link" style={{ ...linkStyle, opacity: 0.6, cursor: "default" }}>
+                  Terms of Service
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Center - Links */}
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <span
-                className="footer-link"
+          {/* Column 3 — Social & Contact */}
+          <div className="flex flex-col gap-4">
+            <h4 style={columnHeadingStyle}>Connect</h4>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://www.facebook.com/profile.php?id=61559153593868"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="footer-social-icon"
                 style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.8rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "8px",
+                  border: "1px solid hsl(var(--border))",
+                  background: "hsl(var(--secondary))",
                   color: "hsl(var(--muted-foreground))",
-                  transition: "color 0.2s ease",
-                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
+                  e.currentTarget.style.color = "hsl(var(--primary))";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "hsl(var(--border))";
+                  e.currentTarget.style.color = "hsl(var(--muted-foreground))";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                Home
-              </span>
-            </Link>
-            <span style={{ color: "hsl(var(--border))", fontSize: "0.7rem" }}>•</span>
-            <Link href="/auth">
-              <span
-                className="footer-link"
+                <Facebook className="h-4 w-4" />
+              </a>
+              <a
+                href="mailto:ratemyfaculty.seu@gmail.com"
+                aria-label="Email"
+                className="footer-social-icon"
                 style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.8rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "8px",
+                  border: "1px solid hsl(var(--border))",
+                  background: "hsl(var(--secondary))",
                   color: "hsl(var(--muted-foreground))",
-                  transition: "color 0.2s ease",
-                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
+                  e.currentTarget.style.color = "hsl(var(--primary))";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "hsl(var(--border))";
+                  e.currentTarget.style.color = "hsl(var(--muted-foreground))";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                Sign In
-              </span>
-            </Link>
-            <span style={{ color: "hsl(var(--border))", fontSize: "0.7rem" }}>•</span>
-            <Link href="/favorites">
-              <span
-                className="footer-link"
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.8rem",
-                  color: "hsl(var(--muted-foreground))",
-                  transition: "color 0.2s ease",
-                  cursor: "pointer",
-                }}
-              >
-                Favorites
-              </span>
-            </Link>
+                <Mail className="h-4 w-4" />
+              </a>
+            </div>
+            <a
+              href="mailto:ratemyfaculty.seu@gmail.com"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "0.75rem",
+                color: "hsl(var(--muted-foreground))",
+                textDecoration: "none",
+                transition: "color 0.2s ease",
+              }}
+              className="footer-link"
+            >
+              ratemyfaculty.seu@gmail.com
+            </a>
           </div>
-
-          {/* Right - Scroll to top */}
-          <button
-            onClick={scrollToTop}
-            aria-label="Scroll to top"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
-              border: "1px solid hsl(var(--border))",
-              background: "hsl(var(--secondary))",
-              color: "hsl(var(--muted-foreground))",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
-              e.currentTarget.style.color = "hsl(var(--primary))";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "hsl(var(--border))";
-              e.currentTarget.style.color = "hsl(var(--muted-foreground))";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            <ArrowUp className="h-3.5 w-3.5" />
-          </button>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: "1px", background: "hsl(var(--border) / 0.6)" }} />
+        {/* ═══ Divider ═══ */}
+        <div style={{ height: "1px", background: "hsl(var(--border) / 0.5)" }} />
 
-        {/* Bottom bar */}
+        {/* ═══ Bottom Bar ═══ */}
         <div
-          className="py-4 flex flex-col sm:flex-row items-center justify-between gap-3"
+          className="py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
+          {/* Left — Credit */}
           <span
             style={{
               fontFamily: "var(--font-sans)",
@@ -265,70 +329,46 @@ export function Footer() {
             <AnimatedName text="Mahmud" />
           </span>
 
-          <div className="flex items-center gap-3">
-            <a
-              href="https://www.facebook.com/profile.php?id=61559153593868"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "28px",
-                height: "28px",
-                borderRadius: "6px",
-                border: "1px solid hsl(var(--border))",
-                background: "hsl(var(--secondary))",
-                color: "hsl(var(--muted-foreground))",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
-                e.currentTarget.style.color = "hsl(var(--primary))";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--border))";
-                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
-              }}
-            >
-              <Facebook className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href="mailto:ratemyfaculty.seu@gmail.com"
-              aria-label="Email"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "28px",
-                height: "28px",
-                borderRadius: "6px",
-                border: "1px solid hsl(var(--border))",
-                background: "hsl(var(--secondary))",
-                color: "hsl(var(--muted-foreground))",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
-                e.currentTarget.style.color = "hsl(var(--primary))";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "hsl(var(--border))";
-                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
-              }}
-            >
-              <Mail className="h-3.5 w-3.5" />
-            </a>
+          {/* Right — Copyright + Scroll to top */}
+          <div className="flex items-center gap-4">
             <span
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "0.7rem",
-                color: "hsl(var(--muted-foreground) / 0.7)",
+                color: "hsl(var(--muted-foreground) / 0.6)",
               }}
             >
-              © {new Date().getFullYear()} Rate My Faculty
+              © {new Date().getFullYear()} Rate My Faculty. All rights reserved.
             </span>
+            <button
+              onClick={scrollToTop}
+              aria-label="Scroll to top"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "30px",
+                height: "30px",
+                borderRadius: "8px",
+                border: "1px solid hsl(var(--border))",
+                background: "hsl(var(--secondary))",
+                color: "hsl(var(--muted-foreground))",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
+                e.currentTarget.style.color = "hsl(var(--primary))";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border))";
+                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
       </div>
