@@ -78,19 +78,17 @@ function AnimatedName({ text }: { text: string }) {
           className="letter"
           style={{
             display: "inline-block",
-            background: isHovered
-              ? "linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)))"
-              : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
+            background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
             fontFamily: "var(--font-display)",
             fontWeight: 800,
             letterSpacing: "0.02em",
-            transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease",
+            transition: `transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.03}s`,
             transform: isHovered
-              ? `translateY(${Math.sin(i * 0.8) * -3}px) scale(1.05)`
-              : "translateY(0) scale(1)",
+              ? "translateY(-2px)"
+              : "translateY(0)",
           }}
         >
           {char}
