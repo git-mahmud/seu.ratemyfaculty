@@ -146,6 +146,7 @@ export default function TeacherProfile() {
                   coursesTaught={teacher.coursesTaught}
                   trigger={
                     <button
+                      className="glow-on-hover"
                       style={{
                         display: "flex", alignItems: "center", gap: "6px",
                         fontSize: "0.82rem", fontWeight: 600,
