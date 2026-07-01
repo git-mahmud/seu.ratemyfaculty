@@ -71,7 +71,7 @@ export default function Home() {
             }} />
 
             <div className="relative" style={{ zIndex: 2, maxWidth: "640px" }}>
-              <div className="blur-in" style={{
+              <div className="blur-in glow-border" style={{
                 display: "inline-flex", alignItems: "center", gap: "6px",
                 padding: "5px 12px", borderRadius: "9999px",
                 marginBottom: "20px",
