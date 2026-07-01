@@ -115,6 +115,7 @@ export function Footer() {
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-3">
               <div
+                className="glow-card"
                 style={{
                   width: "38px",
                   height: "38px",
@@ -434,7 +435,7 @@ export function Footer() {
                 ❤️
               </span>
               {" "}by{" "}
-              <AnimatedName text="MAHMUD" />
+              <AnimatedName text="Mahmud" />
             </span>
 
             {/* Right — Copyright + Scroll to top */}
