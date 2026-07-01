@@ -55,48 +55,66 @@ export default function Favorites() {
               className="app-card text-center px-8 py-14 sm:px-12 sm:py-16 w-full max-w-md fade-in"
               style={{ borderStyle: "dashed" }}
             >
-              {/* Decorative illustration */}
+              {/* Decorative illustration with glow + pulse */}
               <div
                 style={{
-                  width: "80px",
-                  height: "80px",
-                  margin: "0 auto 24px",
+                  width: "88px",
+                  height: "88px",
+                  margin: "0 auto 28px",
                   borderRadius: "50%",
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--accent) / 0.1))",
+                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--accent) / 0.12))",
                   border: "1px solid hsl(var(--primary) / 0.15)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   position: "relative",
+                  boxShadow: "0 0 30px hsl(var(--primary) / 0.12), 0 0 60px hsl(var(--accent) / 0.06)",
+                  animation: "emptyPulse 3s ease-in-out infinite",
                 }}
               >
                 <Heart
                   className="h-8 w-8"
-                  style={{ color: "hsl(0 70% 65%)", opacity: 0.8 }}
+                  style={{
+                    color: "hsl(0 70% 65%)",
+                    opacity: 0.85,
+                    animation: "emptyIconFloat 3s ease-in-out infinite",
+                  }}
                 />
-                {/* Decorative floating dots */}
+                {/* Decorative orbiting dots */}
                 <span
                   style={{
                     position: "absolute",
-                    top: "4px",
-                    right: "2px",
+                    top: "2px",
+                    right: "4px",
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "hsl(var(--primary) / 0.4)",
-                    animation: "heartbeat 2s ease-in-out infinite",
+                    background: "hsl(var(--primary) / 0.5)",
+                    animation: "emptyDot 2.5s ease-in-out infinite",
                   }}
                 />
                 <span
                   style={{
                     position: "absolute",
-                    bottom: "8px",
-                    left: "0px",
+                    bottom: "6px",
+                    left: "-2px",
                     width: "6px",
                     height: "6px",
                     borderRadius: "50%",
-                    background: "hsl(var(--accent) / 0.4)",
-                    animation: "heartbeat 2s ease-in-out infinite 0.5s",
+                    background: "hsl(var(--accent) / 0.5)",
+                    animation: "emptyDot 2.5s ease-in-out infinite 0.8s",
+                  }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: "-4px",
+                    width: "5px",
+                    height: "5px",
+                    borderRadius: "50%",
+                    background: "hsl(var(--primary) / 0.35)",
+                    animation: "emptyDot 2.5s ease-in-out infinite 1.5s",
                   }}
                 />
               </div>
@@ -104,54 +122,65 @@ export default function Favorites() {
               {/* Heading */}
               <p style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "1.15rem",
+                fontSize: "1.2rem",
                 fontWeight: 800,
                 color: "hsl(var(--foreground))",
                 marginBottom: "10px",
+                letterSpacing: "-0.01em",
               }}>
                 No favorites yet
               </p>
 
-              {/* Description */}
+              {/* Description — reduced opacity for hierarchy */}
               <p style={{
+                fontFamily: "var(--font-sans)",
                 fontSize: "0.84rem",
-                color: "hsl(var(--muted-foreground))",
+                fontWeight: 400,
+                color: "hsl(var(--foreground) / 0.55)",
                 lineHeight: 1.6,
-                marginBottom: "24px",
-                maxWidth: "280px",
+                marginBottom: "28px",
+                maxWidth: "260px",
                 marginLeft: "auto",
                 marginRight: "auto",
               }}>
-                Click the <span style={{ color: "hsl(0 70% 60%)" }}>❤️</span> on any
+                Tap the <span style={{ color: "hsl(0 70% 60%)" }}>❤️</span> on any
                 faculty profile to save them here for quick access.
               </p>
 
-              {/* CTA Button */}
+              {/* CTA Button — pill style matching project conventions */}
               <Link href="/">
                 <button
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "8px",
-                    padding: "10px 20px",
-                    borderRadius: "10px",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    padding: "12px 28px",
+                    borderRadius: "9999px",
                     background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
                     color: "white",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "0.84rem",
-                    fontWeight: 600,
                     border: "none",
                     cursor: "pointer",
-                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                    boxShadow: "0 4px 14px hsl(var(--primary) / 0.25)",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease",
+                    boxShadow: "0 4px 16px hsl(var(--primary) / 0.25)",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 6px 20px hsl(var(--primary) / 0.35)";
+                    e.currentTarget.style.boxShadow = "0 8px 24px hsl(var(--primary) / 0.35)";
+                    e.currentTarget.style.filter = "brightness(1.1)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 14px hsl(var(--primary) / 0.25)";
+                    e.currentTarget.style.boxShadow = "0 4px 16px hsl(var(--primary) / 0.25)";
+                    e.currentTarget.style.filter = "brightness(1)";
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = "translateY(0) scale(0.97)";
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px) scale(1)";
                   }}
                 >
                   <Search className="h-4 w-4" />
