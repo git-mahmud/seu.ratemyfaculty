@@ -434,7 +434,7 @@ export function Footer() {
                 ❤️
               </span>
               {" "}by{" "}
-              <AnimatedName text="Mahmud" />
+              <AnimatedName text="MAHMUD" />
             </span>
 
             {/* Right — Copyright + Scroll to top */}
