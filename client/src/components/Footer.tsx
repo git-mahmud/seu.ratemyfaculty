@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { GraduationCap, Github, Mail, ArrowUp } from "lucide-react";
+import { GraduationCap, Mail, ArrowUp, Facebook } from "lucide-react";
 import { Link } from "wouter";
 
 function AnimatedName({ text }: { text: string }) {
@@ -265,15 +265,71 @@ export function Footer() {
             <AnimatedName text="Mahmud" />
           </span>
 
-          <span
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "0.7rem",
-              color: "hsl(var(--muted-foreground) / 0.7)",
-            }}
-          >
-            © {new Date().getFullYear()} Rate My Faculty
-          </span>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.facebook.com/profile.php?id=61559153593868"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px",
+                border: "1px solid hsl(var(--border))",
+                background: "hsl(var(--secondary))",
+                color: "hsl(var(--muted-foreground))",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
+                e.currentTarget.style.color = "hsl(var(--primary))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border))";
+                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
+              }}
+            >
+              <Facebook className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href="mailto:ratemyfaculty.seu@gmail.com"
+              aria-label="Email"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px",
+                border: "1px solid hsl(var(--border))",
+                background: "hsl(var(--secondary))",
+                color: "hsl(var(--muted-foreground))",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--primary) / 0.5)";
+                e.currentTarget.style.color = "hsl(var(--primary))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "hsl(var(--border))";
+                e.currentTarget.style.color = "hsl(var(--muted-foreground))";
+              }}
+            >
+              <Mail className="h-3.5 w-3.5" />
+            </a>
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "0.7rem",
+                color: "hsl(var(--muted-foreground) / 0.7)",
+              }}
+            >
+              © {new Date().getFullYear()} Rate My Faculty
+            </span>
+          </div>
         </div>
       </div>
     </footer>
