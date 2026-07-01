@@ -252,42 +252,57 @@ export function Footer() {
                 Resources
               </h4>
               <div className="flex flex-col gap-1">
-                <span
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "0.82rem",
-                    color: "hsl(var(--foreground) / 0.4)",
-                    display: "inline-block",
-                    padding: "6px 0",
-                    cursor: "default",
-                  }}
-                >
-                  About
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "0.82rem",
-                    color: "hsl(var(--foreground) / 0.4)",
-                    display: "inline-block",
-                    padding: "6px 0",
-                    cursor: "default",
-                  }}
-                >
-                  Privacy Policy
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "0.82rem",
-                    color: "hsl(var(--foreground) / 0.4)",
-                    display: "inline-block",
-                    padding: "6px 0",
-                    cursor: "default",
-                  }}
-                >
-                  Terms of Service
-                </span>
+                <Link href="/about">
+                  <span
+                    className="footer-link"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "0.82rem",
+                      color: "hsl(var(--foreground) / 0.7)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      cursor: "pointer",
+                      display: "inline-block",
+                      padding: "6px 0",
+                    }}
+                  >
+                    About
+                  </span>
+                </Link>
+                <Link href="/privacy">
+                  <span
+                    className="footer-link"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "0.82rem",
+                      color: "hsl(var(--foreground) / 0.7)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      cursor: "pointer",
+                      display: "inline-block",
+                      padding: "6px 0",
+                    }}
+                  >
+                    Privacy Policy
+                  </span>
+                </Link>
+                <Link href="/terms">
+                  <span
+                    className="footer-link"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "0.82rem",
+                      color: "hsl(var(--foreground) / 0.7)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      cursor: "pointer",
+                      display: "inline-block",
+                      padding: "6px 0",
+                    }}
+                  >
+                    Terms of Service
+                  </span>
+                </Link>
               </div>
             </div>
           </div>
