@@ -9,6 +9,9 @@ import TeacherProfile from "@/pages/TeacherProfile";
 import AuthPage from "@/pages/AuthPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Favorites from "@/pages/Favorites";
+import About from "@/pages/About";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +22,9 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/favorites" component={Favorites} />
+      <Route path="/about" component={About} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/terms" component={TermsOfService} />
       <Route component={NotFound} />
     </Switch>
   );
