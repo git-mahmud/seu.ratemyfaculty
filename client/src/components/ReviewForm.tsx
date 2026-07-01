@@ -37,68 +37,6 @@ import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// ── Sharp button click ─────────────────────────────────────────────────────
-function playButtonClick() {
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.005));
-    }
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const gain = ctx.createGain();
-    gain.gain.value = 0.25;
-    src.connect(gain);
-    gain.connect(ctx.destination);
-    src.start();
-    setTimeout(() => ctx.close(), 200);
-  } catch {}
-}
-
-// ── Mechanical keyboard tap ────────────────────────────────────────────────
-function playTypeClick() {
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
-    }
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const gain = ctx.createGain();
-    gain.gain.value = 0.12;
-    src.connect(gain);
-    gain.connect(ctx.destination);
-    src.start();
-    setTimeout(() => ctx.close(), 200);
-  } catch {}
-}
-
-// ── Success chime (ascending tones) ───────────────────────────────────────
-function playSuccessChime() {
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
-      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.12 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.35);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + i * 0.12);
-      osc.stop(ctx.currentTime + i * 0.12 + 0.35);
-    });
-    setTimeout(() => ctx.close(), 1200);
-  } catch {}
-}
-
 interface ReviewFormProps {
   teacherId: number;
   teacherName: string;
@@ -282,7 +220,7 @@ export function ReviewForm({ teacherId, teacherName, coursesTaught, review, trig
       </Dialog>
 
       {trigger ? (
-        <span onClick={() => { playButtonClick(); handleOpenChange(true); }} style={{ cursor: "pointer" }}>
+        <span onClick={() => { handleOpenChange(true); }} style={{ cursor: "pointer" }}>
           {trigger}
         </span>
       ) : (
@@ -435,7 +373,6 @@ export function ReviewForm({ teacherId, teacherName, coursesTaught, review, trig
                         className="min-h-[100px]"
                         {...field}
                         value={field.value || ""}
-                        onKeyDown={() => playTypeClick()}
                       />
                     </FormControl>
                     <FormMessage />
@@ -448,7 +385,6 @@ export function ReviewForm({ teacherId, teacherName, coursesTaught, review, trig
                   Cancel
                 </Button>
                 <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
-                  onClick={() => { if (!createMutation.isPending && !updateMutation.isPending) playSuccessChime(); }}
                 >
                   {createMutation.isPending || updateMutation.isPending ? "Submitting..." : (isEditing ? "Update Review" : "Submit Review")}
                 </Button>
