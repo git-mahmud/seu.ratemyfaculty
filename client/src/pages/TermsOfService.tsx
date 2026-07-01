@@ -51,7 +51,7 @@ export default function TermsOfService() {
             }}
             className="flex flex-col gap-8"
           >
-            <section>
+            <section className="slide-up stagger-1">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -70,7 +70,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-2">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -91,7 +91,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-3">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -111,7 +111,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-4">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -130,7 +130,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-5">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -149,7 +149,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-6">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -169,7 +169,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up" style={{ animationDelay: "0.4s" }}>
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -188,7 +188,7 @@ export default function TermsOfService() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up" style={{ animationDelay: "0.45s" }}>
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
