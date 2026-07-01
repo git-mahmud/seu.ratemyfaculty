@@ -29,7 +29,7 @@ export default function AuthPage() {
 
       {/* Center content */}
       <div className="flex-1 flex items-center justify-center p-4" style={{ zIndex: 1, position: "relative" }}>
-        <div style={{
+        <div className="scale-in" style={{
           position: "relative", width: "100%", maxWidth: "420px",
           background: "hsl(var(--card))",
           border: "1px solid hsl(var(--border))",
