@@ -39,14 +39,14 @@ export default function About() {
             }}
             className="flex flex-col gap-8"
           >
-            <p>
+            <p className="slide-up stagger-1">
               SEU Rate My Faculty is a student-driven platform built exclusively for
               Southeast University students. Our mission is simple — help you make
               informed decisions about your academic journey by giving you access to
               honest faculty reviews and past year questions, all in one place.
             </p>
 
-            <section>
+            <section className="slide-up stagger-2">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -67,7 +67,7 @@ export default function About() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-3">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -88,7 +88,7 @@ export default function About() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-4">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
@@ -108,7 +108,7 @@ export default function About() {
               </p>
             </section>
 
-            <section>
+            <section className="slide-up stagger-5">
               <h2
                 style={{
                   fontFamily: "var(--font-display)",
