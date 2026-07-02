@@ -1,7 +1,12 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useEffect } from "react";
 
 export default function PrivacyPolicy() {
+  useEffect(() => {
+    document.title = "Privacy Policy — SEU Rate My Faculty";
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -175,8 +180,3 @@ export default function PrivacyPolicy() {
             </section>
           </div>
         </article>
-      </main>
-      <Footer />
-    </div>
-  );
-}
