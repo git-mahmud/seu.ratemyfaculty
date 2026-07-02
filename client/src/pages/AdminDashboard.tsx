@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const panelStyle = {
   background: "hsl(var(--card))",
@@ -34,6 +34,10 @@ export default function AdminDashboard() {
 
   const isAdmin = user?.role === "admin";
   const isModerator = user?.role === "moderator";
+
+  useEffect(() => {
+    document.title = "Dashboard — SEU Rate My Faculty";
+  }, []);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
