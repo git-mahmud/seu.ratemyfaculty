@@ -9,6 +9,10 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    document.title = "Sign In — SEU Rate My Faculty";
+  }, []);
+
+  useEffect(() => {
     if (user) {
       const params = new URLSearchParams(window.location.search);
       const redirect = params.get("redirect") || "/";
@@ -29,7 +33,7 @@ export default function AuthPage() {
 
       {/* Center content */}
       <div className="flex-1 flex items-center justify-center p-4" style={{ zIndex: 1, position: "relative" }}>
-        <div style={{
+        <div className="scale-in" style={{
           position: "relative", width: "100%", maxWidth: "420px",
           background: "hsl(var(--card))",
           border: "1px solid hsl(var(--border))",
@@ -40,7 +44,7 @@ export default function AuthPage() {
         }}>
 
           {/* Icon */}
-          <div style={{
+          <div className="glow-card" style={{
             width: "64px", height: "64px", margin: "0 auto 20px",
             display: "flex", alignItems: "center", justifyContent: "center",
             background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.3)",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRoute } from "wouter";
 import { useTeacher } from "@/hooks/use-teachers";
 import { useReviews } from "@/hooks/use-reviews";
@@ -31,6 +31,12 @@ export default function TeacherProfile() {
 
   const { data: teacher, isLoading: teacherLoading, error: teacherError } = useTeacher(teacherId);
   const { data: reviews, isLoading: reviewsLoading } = useReviews(teacherId);
+
+  useEffect(() => {
+    if (teacher) {
+      document.title = `${teacher.fullName} Reviews — SEU Rate My Faculty`;
+    }
+  }, [teacher]);
 
   const deleteReviewMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -109,7 +115,7 @@ export default function TeacherProfile() {
         <div className="container mx-auto px-4 py-8 grid lg:grid-cols-3 gap-8">
 
           {/* ===== REVIEWS COLUMN ===== */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 slide-up">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.3rem", fontWeight: 800, color: "hsl(var(--foreground))" }}>
                 Reviews
@@ -146,6 +152,7 @@ export default function TeacherProfile() {
                   coursesTaught={teacher.coursesTaught}
                   trigger={
                     <button
+                      className="glow-on-hover"
                       style={{
                         display: "flex", alignItems: "center", gap: "6px",
                         fontSize: "0.82rem", fontWeight: 600,
@@ -181,12 +188,12 @@ export default function TeacherProfile() {
               </div>
             ) : (
               <div className="space-y-4">
-                {reviews?.map((review) => {
+                {reviews?.map((review, index) => {
                   const isAdmin = user?.email === "2025100000379@seu.edu.bd";
                   const isOwner = user?.id === review.studentId;
 
                   return (
-                    <div key={review.id} className="app-card fade-in" style={{ padding: "22px" }}>
+                    <div key={review.id} className="app-card slide-up" style={{ padding: "22px", animationDelay: `${index * 0.06}s` }}>
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
                           <div style={{
@@ -256,7 +263,7 @@ export default function TeacherProfile() {
           </div>
 
           {/* ===== SIDEBAR ===== */}
-          <div className="space-y-5">
+          <div className="space-y-5 slide-in-right stagger-2">
             <div className="app-card overflow-hidden">
               <PyqList teacherId={teacher.id} hideUpload={true} />
             </div>

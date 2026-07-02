@@ -73,6 +73,26 @@ export function PyqList({ teacherId, hideUpload = false }: { teacherId: number, 
             </div>
           ) : (
             <div className="space-y-6">
+              <div style={{
+                background: "hsl(var(--primary) / 0.06)",
+                border: "1px solid hsl(var(--primary) / 0.2)",
+                borderRadius: "var(--radius)",
+                padding: "10px 14px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "8px",
+              }}>
+                <span style={{ fontSize: "0.85rem", flexShrink: 0 }}>ℹ️</span>
+                <p style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.75rem",
+                  color: "hsl(var(--primary) / 0.85)",
+                  lineHeight: 1.6,
+                  margin: 0,
+                }}>
+                  Make sure that you are using your <strong style={{ color: "hsl(var(--primary))" }}>@seu.edu.bd</strong> email to access them.
+                </p>
+              </div>
               {Object.entries(groupedPyqs).map(([courseCode, items]: [string, any]) => (
                 <div key={courseCode} className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -82,27 +102,6 @@ export function PyqList({ teacherId, hideUpload = false }: { teacherId: number, 
                     </h3>
                   </div>
                   <div className="grid grid-cols-1 gap-2 pl-4">
-                    <div style={{
-                      background:"rgba(0,200,255,0.06)",
-                      border:"1px solid rgba(0,200,255,0.2)",
-                      padding:"10px 14px",
-                      marginBottom:"12px",
-                      display:"flex",
-                      alignItems:"flex-start",
-                      gap:"8px",
-                    }}>
-                      <span style={{ fontSize:"0.9rem", flexShrink:0 }}>ℹ️</span>
-                      <p style={{
-                        fontFamily:"var(--font-mono)",
-                        fontSize:"0.68rem",
-                        color:"rgba(0,200,255,0.75)",
-                        letterSpacing:"0.04em",
-                        lineHeight:1.6,
-                        margin:0,
-                      }}>
-                        Make sure that you are using your <strong style={{ color:"rgba(0,200,255,1)" }}>@seu.edu.bd</strong> email to access them.
-                      </p>
-                    </div>
                     {items.map((pyq: any) => (
                       <div key={pyq.id} className="relative group/pyq">
                         <a

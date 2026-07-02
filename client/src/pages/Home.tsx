@@ -22,6 +22,10 @@ export default function Home() {
 
   useEffect(() => { setTimeout(() => setMounted(true), 80); }, []);
 
+  useEffect(() => {
+    document.title = "SEU Rate My Faculty — Faculty Reviews & PYQs";
+  }, []);
+
   const filteredTeachers = teachers
     ?.filter(t =>
       t.fullName.toLowerCase().includes(search.toLowerCase()) ||
@@ -71,7 +75,7 @@ export default function Home() {
             }} />
 
             <div className="relative" style={{ zIndex: 2, maxWidth: "640px" }}>
-              <div style={{
+              <div className="blur-in glow-border" style={{
                 display: "inline-flex", alignItems: "center", gap: "6px",
                 padding: "5px 12px", borderRadius: "9999px",
                 marginBottom: "20px",
@@ -84,7 +88,7 @@ export default function Home() {
                 </span>
               </div>
 
-              <h1 style={{
+              <h1 className="slide-up stagger-1" style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "clamp(2rem, 4.5vw, 3rem)",
                 fontWeight: 800,
@@ -103,7 +107,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p style={{
+              <p className="slide-up stagger-2" style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "1.05rem",
                 color: "hsl(var(--hero-subtext))",
@@ -114,17 +118,17 @@ export default function Home() {
               </p>
 
               {/* Stats row */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "14px", maxWidth: "520px" }}>
-                <StatPill icon={<MessageSquare className="h-4 w-4" />} value={totalReviews} label="Reviews" />
-                <StatPill icon={<FileText className="h-4 w-4" />} value={STATS.pyqUploaded} label="PYQ Uploaded" />
-                <StatPill icon={<Users className="h-4 w-4" />} value={STATS.usersJoined} label="Users Joined" />
+              <div className="slide-up stagger-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "14px", maxWidth: "520px" }}>
+                <StatPill icon={<MessageSquare className="h-4 w-4" />} value={totalReviews} label="Reviews" delay={0} />
+                <StatPill icon={<FileText className="h-4 w-4" />} value={STATS.pyqUploaded} label="PYQ Uploaded" delay={1} />
+                <StatPill icon={<Users className="h-4 w-4" />} value={STATS.usersJoined} label="Users Joined" delay={2} />
               </div>
             </div>
           </div>
         </div>
 
         {/* ===== SEARCH BAR ===== */}
-        <div className="container mx-auto px-4 pt-10 pb-2" style={{ maxWidth: "900px" }}>
+        <div className="container mx-auto px-4 pt-10 pb-2 slide-up stagger-4" style={{ maxWidth: "900px" }}>
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "hsl(var(--muted-foreground))" }} />
             <input
@@ -226,9 +230,9 @@ export default function Home() {
   );
 }
 
-function StatPill({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+function StatPill({ icon, value, label, delay = 0 }: { icon: React.ReactNode; value: number; label: string; delay?: number }) {
   return (
-    <div style={{
+    <div className="scale-in" style={{
       display: "flex",
       alignItems: "center",
       gap: "10px",
@@ -237,6 +241,7 @@ function StatPill({ icon, value, label }: { icon: React.ReactNode; value: number
       background: "hsl(var(--card))",
       border: "1px solid hsl(var(--border))",
       boxShadow: "0 4px 14px hsl(var(--hero-text) / 0.08)",
+      animationDelay: `${0.25 + delay * 0.08}s`,
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
