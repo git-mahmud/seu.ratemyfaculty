@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export default function PrivacyPolicy() {
   useEffect(() => {
-    document.title = "Privacy Policy — SEU Rate My Faculty";
+    document.title = "Privacy Policy - SEU Rate My Faculty";
   }, []);
 
   return (
@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
               <p>
                 Your email address is used solely to authenticate your identity as an SEU
                 student and to associate your submitted reviews with your account. Your
-                identity is never revealed publicly — all reviews appear as "Anonymous
+                identity is never revealed publicly - all reviews appear as "Anonymous
                 Student" to other users.
               </p>
             </section>

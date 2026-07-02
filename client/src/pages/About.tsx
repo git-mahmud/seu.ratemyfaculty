@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export default function About() {
   useEffect(() => {
-    document.title = "About — SEU Rate My Faculty";
+    document.title = "About - SEU Rate My Faculty";
   }, []);
 
   return (
@@ -46,7 +46,7 @@ export default function About() {
           >
             <p className="slide-up stagger-1">
               SEU Rate My Faculty is a student-driven platform built exclusively for
-              Southeast University students. Our mission is simple — help you make
+              Southeast University students. Our mission is simple - help you make
               informed decisions about your academic journey by giving you access to
               honest faculty reviews and past year questions, all in one place.
             </p>
@@ -68,7 +68,7 @@ export default function About() {
                 students, and access previous year exam questions uploaded by the community.
                 Every review covers key details like personality, marking style, exam
                 difficulty, and which type of students a faculty member is best suited
-                for — giving you a complete picture before you step into the classroom.
+                for - giving you a complete picture before you step into the classroom.
               </p>
             </section>
 
@@ -127,7 +127,7 @@ export default function About() {
               </h2>
               <p>
                 Have suggestions, found an issue, or want to contribute? Reach out to us
-                at the university or through the platform. We're students too — we get it.
+                at the university or through the platform. We're students too - we get it.
               </p>
             </section>
           </div>
