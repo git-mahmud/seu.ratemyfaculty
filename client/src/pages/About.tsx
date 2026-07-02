@@ -132,3 +132,8 @@ export default function About() {
             </section>
           </div>
         </article>
+      </main>
+      <Footer />
+    </div>
+  );
+}
