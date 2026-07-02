@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export default function TermsOfService() {
   useEffect(() => {
-    document.title = "Terms of Service — SEU Rate My Faculty";
+    document.title = "Terms of Service - SEU Rate My Faculty";
   }, []);
 
   return (
