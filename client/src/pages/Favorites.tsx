@@ -198,3 +198,7 @@ export default function Favorites() {
         )}
       </main>
 
+      <Footer />
+    </div>
+  );
+}
