@@ -9,6 +9,10 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    document.title = "Sign In — SEU Rate My Faculty";
+  }, []);
+
+  useEffect(() => {
     if (user) {
       const params = new URLSearchParams(window.location.search);
       const redirect = params.get("redirect") || "/";
