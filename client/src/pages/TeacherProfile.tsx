@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRoute } from "wouter";
 import { useTeacher } from "@/hooks/use-teachers";
 import { useReviews } from "@/hooks/use-reviews";
@@ -31,12 +31,6 @@ export default function TeacherProfile() {
 
   const { data: teacher, isLoading: teacherLoading, error: teacherError } = useTeacher(teacherId);
   const { data: reviews, isLoading: reviewsLoading } = useReviews(teacherId);
-
-  useEffect(() => {
-    if (teacher) {
-      document.title = `${teacher.fullName} Reviews — SEU Rate My Faculty`;
-    }
-  }, [teacher]);
 
   const deleteReviewMutation = useMutation({
     mutationFn: async (id: number) => {

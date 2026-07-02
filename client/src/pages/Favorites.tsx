@@ -5,17 +5,12 @@ import { TeacherCard } from "@/components/TeacherCard";
 import { Footer } from "@/components/Footer";
 import { Heart, Search } from "lucide-react";
 import { Link } from "wouter";
-import { useEffect } from "react";
 
 export default function Favorites() {
   const { data: favorites, isLoading: favLoading } = useFavorites();
   const { data: teachers, isLoading: teachersLoading } = useTeachers();
 
   const isLoading = favLoading || teachersLoading;
-
-  useEffect(() => {
-    document.title = "My Favorites — SEU Rate My Faculty";
-  }, []);
 
   const favoriteTeachers = teachers?.filter(t =>
     favorites?.some((f: any) => f.teacherId === t.id)

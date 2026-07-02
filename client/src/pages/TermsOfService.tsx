@@ -1,12 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useEffect } from "react";
 
 export default function TermsOfService() {
-  useEffect(() => {
-    document.title = "Terms of Service - SEU Rate My Faculty";
-  }, []);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

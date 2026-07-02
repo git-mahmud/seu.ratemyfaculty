@@ -22,10 +22,6 @@ export default function Home() {
 
   useEffect(() => { setTimeout(() => setMounted(true), 80); }, []);
 
-  useEffect(() => {
-    document.title = "SEU Rate My Faculty — Faculty Reviews & PYQs";
-  }, []);
-
   const filteredTeachers = teachers
     ?.filter(t =>
       t.fullName.toLowerCase().includes(search.toLowerCase()) ||

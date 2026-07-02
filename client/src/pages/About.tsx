@@ -1,12 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useEffect } from "react";
 
 export default function About() {
-  useEffect(() => {
-    document.title = "About - SEU Rate My Faculty";
-  }, []);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
