@@ -8,7 +8,7 @@ import { Search, MessageSquare, FileText, Users } from "lucide-react";
 // ── Hardcoded stats (update manually) ──
 const STATS = {
   pyqUploaded: 117,
-  usersJoined: 146,
+  usersJoined: 147,
 };
 
 const PAGE_SIZE = 6;
