@@ -98,49 +98,75 @@ export default function Leaderboard() {
           </div>
         ) : (
           <>
-            {/* ═══ Top 3 Podium ═══ */}
-            <div
-              className="slide-up stagger-2"
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: "24px",
-                border: "1px solid hsl(var(--border))",
-                background: "linear-gradient(150deg, hsl(var(--hero-1)) 0%, hsl(var(--hero-2)) 35%, hsl(var(--hero-3)) 65%, hsl(var(--hero-4)) 100%)",
-                padding: "48px 20px 36px",
-                marginBottom: "28px",
-              }}
-            >
-              {/* Grid pattern overlay */}
-              <div style={{
-                position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.03) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.03) 1px, transparent 1px)",
-                backgroundSize: "40px 40px",
-              }} />
-              {/* Ambient blobs */}
-              <div style={{
-                position: "absolute", top: "-80px", right: "-60px", width: "300px", height: "300px",
-                borderRadius: "50%", background: "hsl(var(--primary) / 0.12)", filter: "blur(80px)", pointerEvents: "none",
-              }} />
-              <div style={{
-                position: "absolute", bottom: "-100px", left: "5%", width: "250px", height: "250px",
-                borderRadius: "50%", background: "hsl(var(--accent) / 0.1)", filter: "blur(80px)", pointerEvents: "none",
-              }} />
+            {/* ═══ Top 3 — Separate cards ═══ */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 slide-up stagger-2">
+              {/* 1st place — largest, most prominent */}
+              {top3[0] && (
+                <div
+                  className="app-card sm:col-span-3 flex flex-col items-center text-center"
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    padding: "36px 20px 28px",
+                    borderColor: "hsl(45 90% 55% / 0.3)",
+                    background: "linear-gradient(150deg, hsl(var(--hero-1)) 0%, hsl(var(--hero-2)) 50%, hsl(var(--hero-3)) 100%)",
+                  }}
+                >
+                  {/* Ambient glow */}
+                  <div style={{
+                    position: "absolute", top: "-60px", left: "50%", transform: "translateX(-50%)",
+                    width: "300px", height: "200px", borderRadius: "50%",
+                    background: "hsl(45 90% 55% / 0.08)", filter: "blur(60px)", pointerEvents: "none",
+                  }} />
+                  <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <PodiumCard entry={top3[0]} rank={1} />
+                  </div>
+                </div>
+              )}
 
-              <div className="relative grid grid-cols-3 gap-2 sm:gap-6" style={{ zIndex: 1 }}>
-                {/* 2nd place */}
-                <div className="flex flex-col items-center pt-10">
-                  {top3[1] && <PodiumCard entry={top3[1]} rank={2} />}
+              {/* 2nd place */}
+              {top3[1] && (
+                <div
+                  className="app-card sm:col-span-1 flex flex-col items-center text-center"
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    padding: "28px 16px 22px",
+                    borderColor: "hsl(220 15% 75% / 0.2)",
+                  }}
+                >
+                  <div style={{
+                    position: "absolute", top: "-40px", left: "50%", transform: "translateX(-50%)",
+                    width: "200px", height: "150px", borderRadius: "50%",
+                    background: "hsl(220 15% 75% / 0.05)", filter: "blur(50px)", pointerEvents: "none",
+                  }} />
+                  <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <PodiumCard entry={top3[1]} rank={2} />
+                  </div>
                 </div>
-                {/* 1st place */}
-                <div className="flex flex-col items-center">
-                  {top3[0] && <PodiumCard entry={top3[0]} rank={1} />}
+              )}
+
+              {/* 3rd place */}
+              {top3[2] && (
+                <div
+                  className="app-card sm:col-span-2 flex flex-col items-center text-center"
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    padding: "28px 16px 22px",
+                    borderColor: "hsl(25 60% 60% / 0.2)",
+                  }}
+                >
+                  <div style={{
+                    position: "absolute", top: "-40px", left: "50%", transform: "translateX(-50%)",
+                    width: "200px", height: "150px", borderRadius: "50%",
+                    background: "hsl(25 60% 60% / 0.04)", filter: "blur(50px)", pointerEvents: "none",
+                  }} />
+                  <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <PodiumCard entry={top3[2]} rank={3} />
+                  </div>
                 </div>
-                {/* 3rd place */}
-                <div className="flex flex-col items-center pt-14">
-                  {top3[2] && <PodiumCard entry={top3[2]} rank={3} />}
-                </div>
-              </div>
+              )}
             </div>
 
             {/* ═══ Rest of leaderboard ═══ */}
