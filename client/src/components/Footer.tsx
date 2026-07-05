@@ -236,6 +236,23 @@ export function Footer() {
                     Favorites
                   </span>
                 </Link>
+                <Link href="/leaderboard">
+                  <span
+                    className="footer-link"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "0.82rem",
+                      color: "hsl(var(--foreground) / 0.7)",
+                      textDecoration: "none",
+                      transition: "color 0.2s ease",
+                      cursor: "pointer",
+                      display: "inline-block",
+                      padding: "6px 0",
+                    }}
+                  >
+                    Leaderboard
+                  </span>
+                </Link>
               </nav>
             </div>
             <div>
