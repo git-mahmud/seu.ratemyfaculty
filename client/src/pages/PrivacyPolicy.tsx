@@ -53,9 +53,10 @@ export default function PrivacyPolicy() {
               </h2>
               <p>
                 When you sign in to SEU Rate My Faculty, we collect your SEU Google
-                account email address and basic profile information provided by Google
-                OAuth. We do not collect passwords, phone numbers, or any sensitive
-                personal data beyond what is required for authentication.
+                account email address, display name, and profile photo URL as provided
+                by Google OAuth. We do not collect passwords, phone numbers, or any
+                sensitive personal data beyond what is required for authentication and
+                displaying your identity on the leaderboard.
               </p>
             </section>
 
@@ -74,8 +75,9 @@ export default function PrivacyPolicy() {
               <p>
                 Your email address is used solely to authenticate your identity as an SEU
                 student and to associate your submitted reviews with your account. Your
-                identity is never revealed publicly - all reviews appear as "Anonymous
-                Student" to other users.
+                display name and profile photo are shown on the Contributors Leaderboard
+                to recognize active community members. Your identity is never revealed
+                on reviews - all reviews appear as "Anonymous Student" to other users.
               </p>
             </section>
 
