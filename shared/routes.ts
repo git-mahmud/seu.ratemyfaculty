@@ -190,6 +190,21 @@ export const api = {
       },
     },
   },
+  leaderboard: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/leaderboard',
+      responses: {
+        200: z.array(z.object({
+          userId: z.number(),
+          email: z.string(),
+          reviewCount: z.number(),
+          pyqCount: z.number(),
+          points: z.number(),
+        })),
+      },
+    },
+  },
 };
 
 export function buildUrl(path: string, params?: Record<string, string | number>): string {

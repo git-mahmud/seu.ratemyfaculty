@@ -295,5 +295,16 @@ export async function registerRoutes(
     res.json({ isFavorite });
   });
 
+  // === LEADERBOARD ===
+
+  app.get(api.leaderboard.list.path, async (req, res) => {
+    try {
+      const leaderboard = await storage.getLeaderboard();
+      res.json(leaderboard);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch leaderboard" });
+    }
+  });
+
   return httpServer;
 }

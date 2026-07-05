@@ -7,7 +7,7 @@ import {
   type Favorite
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, count, and } from "drizzle-orm";
+import { eq, count, and, sql, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -260,6 +260,45 @@ async updateUserGoogleId(id: number, googleId: string): Promise<User | undefined
     const [fav] = await db.select().from(favorites)
       .where(and(eq(favorites.userId, userId), eq(favorites.teacherId, teacherId)));
     return !!fav;
+  }
+  // Leaderboard
+  async getLeaderboard(): Promise<{ userId: number; email: string; reviewCount: number; pyqCount: number; points: number }[]> {
+    // Get review counts per user
+    const reviewCounts = await db
+      .select({
+        userId: reviews.studentId,
+        reviewCount: count(reviews.id),
+      })
+      .from(reviews)
+      .groupBy(reviews.studentId);
+
+    if (reviewCounts.length === 0) return [];
+
+    // Get all users to map IDs to emails
+    const allUsers = await db.select({ id: users.id, email: users.email }).from(users);
+    const userMap = new Map(allUsers.map(u => [u.id, u.email]));
+
+    // Admin email to exclude from leaderboard
+    const excludedEmail = "2025100000379@seu.edu.bd";
+
+    // Build leaderboard - only review points (10 pts each)
+    const leaderboard = reviewCounts
+      .map(r => {
+        const email = userMap.get(r.userId) || "unknown";
+        const reviewCount = Number(r.reviewCount);
+        return {
+          userId: r.userId,
+          email,
+          reviewCount,
+          pyqCount: 0,
+          points: reviewCount * 10,
+        };
+      })
+      .filter(entry => entry.points > 0 && entry.email !== excludedEmail)
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 10);
+
+    return leaderboard;
   }
 }
 
