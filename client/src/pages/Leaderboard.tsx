@@ -100,7 +100,7 @@ export default function Leaderboard() {
           <>
             {/* ═══ Top 3 Podium ═══ */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8 slide-up stagger-2">
-              {/* 2nd place */}
+              {/* 2nd place — Silver */}
               <div className="pt-6 sm:pt-8">
                 {top3[1] && (
                   <div
@@ -109,13 +109,15 @@ export default function Leaderboard() {
                       padding: "20px 10px 18px",
                       position: "relative",
                       overflow: "hidden",
-                      borderColor: "hsl(220 15% 75% / 0.25)",
+                      borderColor: "hsl(220 15% 65% / 0.3)",
+                      background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(220 15% 50% / 0.06) 100%)",
+                      boxShadow: "0 4px 24px hsl(220 15% 65% / 0.08), inset 0 1px 0 hsl(220 15% 75% / 0.1)",
                     }}
                   >
                     <div style={{
                       position: "absolute", top: "-30px", left: "50%", transform: "translateX(-50%)",
-                      width: "120px", height: "120px", borderRadius: "50%",
-                      background: "hsl(220 15% 75% / 0.04)", filter: "blur(40px)", pointerEvents: "none",
+                      width: "140px", height: "140px", borderRadius: "50%",
+                      background: "hsl(220 15% 75% / 0.06)", filter: "blur(40px)", pointerEvents: "none",
                     }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <PodiumCard entry={top3[1]} rank={2} />
@@ -124,7 +126,7 @@ export default function Leaderboard() {
                 )}
               </div>
 
-              {/* 1st place — tallest */}
+              {/* 1st place — Gold */}
               <div>
                 {top3[0] && (
                   <div
@@ -133,14 +135,15 @@ export default function Leaderboard() {
                       padding: "24px 10px 20px",
                       position: "relative",
                       overflow: "hidden",
-                      borderColor: "hsl(45 90% 55% / 0.3)",
-                      background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--hero-2) / 0.3) 100%)",
+                      borderColor: "hsl(45 90% 55% / 0.35)",
+                      background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(45 80% 45% / 0.08) 100%)",
+                      boxShadow: "0 4px 30px hsl(45 90% 55% / 0.1), inset 0 1px 0 hsl(45 90% 55% / 0.15)",
                     }}
                   >
                     <div style={{
                       position: "absolute", top: "-40px", left: "50%", transform: "translateX(-50%)",
-                      width: "160px", height: "160px", borderRadius: "50%",
-                      background: "hsl(45 90% 55% / 0.06)", filter: "blur(50px)", pointerEvents: "none",
+                      width: "180px", height: "180px", borderRadius: "50%",
+                      background: "hsl(45 90% 55% / 0.07)", filter: "blur(50px)", pointerEvents: "none",
                     }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <PodiumCard entry={top3[0]} rank={1} />
@@ -149,7 +152,7 @@ export default function Leaderboard() {
                 )}
               </div>
 
-              {/* 3rd place */}
+              {/* 3rd place — Bronze */}
               <div className="pt-10 sm:pt-12">
                 {top3[2] && (
                   <div
@@ -158,13 +161,15 @@ export default function Leaderboard() {
                       padding: "20px 10px 18px",
                       position: "relative",
                       overflow: "hidden",
-                      borderColor: "hsl(25 60% 60% / 0.2)",
+                      borderColor: "hsl(25 60% 50% / 0.25)",
+                      background: "linear-gradient(180deg, hsl(var(--card)) 0%, hsl(25 50% 40% / 0.06) 100%)",
+                      boxShadow: "0 4px 24px hsl(25 60% 50% / 0.08), inset 0 1px 0 hsl(25 60% 60% / 0.1)",
                     }}
                   >
                     <div style={{
                       position: "absolute", top: "-30px", left: "50%", transform: "translateX(-50%)",
-                      width: "120px", height: "120px", borderRadius: "50%",
-                      background: "hsl(25 60% 60% / 0.04)", filter: "blur(40px)", pointerEvents: "none",
+                      width: "140px", height: "140px", borderRadius: "50%",
+                      background: "hsl(25 60% 55% / 0.05)", filter: "blur(40px)", pointerEvents: "none",
                     }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <PodiumCard entry={top3[2]} rank={3} />
