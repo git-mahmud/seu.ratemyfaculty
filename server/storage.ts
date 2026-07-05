@@ -80,6 +80,15 @@ async updateUserGoogleId(id: number, googleId: string): Promise<User | undefined
       .returning();
     return updated;
   }
+
+  async updateUserProfile(id: number, displayName: string | null, photoUrl: string | null): Promise<void> {
+    const updates: Record<string, any> = {};
+    if (displayName) updates.displayName = displayName;
+    if (photoUrl) updates.photoUrl = photoUrl;
+    if (Object.keys(updates).length > 0) {
+      await db.update(users).set(updates).where(eq(users.id, id));
+    }
+  }
   
   async updateUserRole(email: string, role: "admin" | "moderator" | "student"): Promise<User | undefined> {
     // Prevent changing role of the fixed admin
@@ -262,7 +271,7 @@ async updateUserGoogleId(id: number, googleId: string): Promise<User | undefined
     return !!fav;
   }
   // Leaderboard
-  async getLeaderboard(): Promise<{ userId: number; email: string; reviewCount: number; pyqCount: number; points: number }[]> {
+  async getLeaderboard(): Promise<{ userId: number; email: string; displayName: string | null; photoUrl: string | null; reviewCount: number; pyqCount: number; points: number }[]> {
     // Get review counts per user
     const reviewCounts = await db
       .select({
@@ -274,9 +283,9 @@ async updateUserGoogleId(id: number, googleId: string): Promise<User | undefined
 
     if (reviewCounts.length === 0) return [];
 
-    // Get all users to map IDs to emails
-    const allUsers = await db.select({ id: users.id, email: users.email }).from(users);
-    const userMap = new Map(allUsers.map(u => [u.id, u.email]));
+    // Get all users to map IDs to profile info
+    const allUsers = await db.select({ id: users.id, email: users.email, displayName: users.displayName, photoUrl: users.photoUrl }).from(users);
+    const userMap = new Map(allUsers.map(u => [u.id, { email: u.email, displayName: u.displayName, photoUrl: u.photoUrl }]));
 
     // Admin email to exclude from leaderboard
     const excludedEmail = "2025100000379@seu.edu.bd";
@@ -284,11 +293,13 @@ async updateUserGoogleId(id: number, googleId: string): Promise<User | undefined
     // Build leaderboard - only review points (10 pts each)
     const leaderboard = reviewCounts
       .map(r => {
-        const email = userMap.get(r.userId) || "unknown";
+        const userInfo = userMap.get(r.userId) || { email: "unknown", displayName: null, photoUrl: null };
         const reviewCount = Number(r.reviewCount);
         return {
           userId: r.userId,
-          email,
+          email: userInfo.email,
+          displayName: userInfo.displayName,
+          photoUrl: userInfo.photoUrl,
           reviewCount,
           pyqCount: 0,
           points: reviewCount * 10,

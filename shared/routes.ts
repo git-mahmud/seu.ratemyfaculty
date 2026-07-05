@@ -198,6 +198,8 @@ export const api = {
         200: z.array(z.object({
           userId: z.number(),
           email: z.string(),
+          displayName: z.string().nullable(),
+          photoUrl: z.string().nullable(),
           reviewCount: z.number(),
           pyqCount: z.number(),
           points: z.number(),

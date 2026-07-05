@@ -62,20 +62,29 @@ passport.use(
           if (!email || !email.endsWith("@seu.edu.bd")) {
             return done(null, false);
           }
+          const displayName = profile.displayName || null;
+          const photoUrl = profile.photos?.[0]?.value || null;
+
           let user = await storage.getUserByGoogleId(profile.id);
           if (!user) {
             user = await storage.getUserByEmail(email);
             if (user) {
-              // Link Google ID to existing account
+              // Link Google ID + update profile info
               user = await storage.updateUserGoogleId(user.id, profile.id) || user;
+              await storage.updateUserProfile(user.id, displayName, photoUrl);
             } else {
-              // Create new account
+              // Create new account with profile info
               user = await storage.createUser({
                 email,
                 password: "",
                 googleId: profile.id,
+                displayName,
+                photoUrl,
               });
             }
+          } else {
+            // Update profile info on each login (photo may change)
+            await storage.updateUserProfile(user.id, displayName, photoUrl);
           }
           return done(null, user);
         } catch (err) {

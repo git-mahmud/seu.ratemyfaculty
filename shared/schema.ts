@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   role: text("role", { enum: ["admin", "moderator", "student"] }).default("student").notNull(),
   googleId: text("google_id").unique(),
+  displayName: text("display_name"),
+  photoUrl: text("photo_url"),
 });
 
 export const teachers = pgTable("teachers", {

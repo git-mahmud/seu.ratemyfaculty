@@ -1,4 +1,4 @@
-import { useLeaderboard } from "@/hooks/use-leaderboard";
+import { useLeaderboard, type LeaderboardEntry } from "@/hooks/use-leaderboard";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Trophy, Star, Medal } from "lucide-react";
@@ -10,8 +10,14 @@ function maskEmail(email: string): string {
   return `${visible}***@${domain}`;
 }
 
-function getInitial(email: string): string {
-  return email.charAt(0).toUpperCase();
+function getDisplayName(entry: LeaderboardEntry): string {
+  if (entry.displayName) return entry.displayName;
+  return maskEmail(entry.email);
+}
+
+function getInitial(entry: LeaderboardEntry): string {
+  if (entry.displayName) return entry.displayName.charAt(0).toUpperCase();
+  return entry.email.charAt(0).toUpperCase();
 }
 
 function getTier(points: number): { label: string; color: string } {
@@ -62,7 +68,7 @@ export default function Leaderboard() {
               color: "hsl(var(--muted-foreground))",
               marginTop: "2px",
             }}>
-              Earn points by sharing reviews and uploading PYQs
+              Earn points by sharing reviews
             </p>
           </div>
         </div>
@@ -129,7 +135,7 @@ export default function Leaderboard() {
   );
 }
 
-function PodiumCard({ entry, rank }: { entry: { userId: number; email: string; points: number; reviewCount: number; pyqCount: number }; rank: number }) {
+function PodiumCard({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
   const tier = getTier(entry.points);
   const isFirst = rank === 1;
   const ringColor = rank === 1
@@ -160,7 +166,7 @@ function PodiumCard({ entry, rank }: { entry: { userId: number; email: string; p
           padding: "3px 10px",
           borderRadius: "9999px",
           background: rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(220 10% 70%)" : "hsl(25 60% 55%)",
-          color: rank === 1 ? "hsl(0 0% 10%)" : "hsl(0 0% 10%)",
+          color: "hsl(0 0% 10%)",
           fontSize: "0.65rem",
           fontWeight: 700,
         }}
@@ -171,34 +177,65 @@ function PodiumCard({ entry, rank }: { entry: { userId: number; email: string; p
       </div>
 
       {/* Avatar */}
-      <div
-        style={{
-          width: isFirst ? "64px" : "52px",
-          height: isFirst ? "64px" : "52px",
-          borderRadius: "50%",
-          border: `3px solid ${ringColor}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "hsl(var(--primary) / 0.1)",
-          marginTop: "8px",
-          marginBottom: "8px",
-          fontSize: isFirst ? "1.2rem" : "1rem",
-          fontWeight: 700,
-          color: "hsl(var(--primary))",
-          fontFamily: "var(--font-display)",
-        }}
-      >
-        {getInitial(entry.email)}
-      </div>
+      {entry.photoUrl ? (
+        <img
+          src={entry.photoUrl}
+          alt={getDisplayName(entry)}
+          style={{
+            width: isFirst ? "64px" : "52px",
+            height: isFirst ? "64px" : "52px",
+            borderRadius: "50%",
+            border: `3px solid ${ringColor}`,
+            objectFit: "cover",
+            marginTop: "8px",
+            marginBottom: "8px",
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: isFirst ? "64px" : "52px",
+            height: isFirst ? "64px" : "52px",
+            borderRadius: "50%",
+            border: `3px solid ${ringColor}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "hsl(var(--primary) / 0.1)",
+            marginTop: "8px",
+            marginBottom: "8px",
+            fontSize: isFirst ? "1.2rem" : "1rem",
+            fontWeight: 700,
+            color: "hsl(var(--primary))",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          {getInitial(entry)}
+        </div>
+      )}
 
       {/* Star */}
       <Star className="h-4 w-4" style={{ color: "hsl(45 90% 55%)", fill: "hsl(45 90% 55%)", marginBottom: "6px" }} />
 
+      {/* Name */}
+      <p style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "0.72rem",
+        fontWeight: 700,
+        color: "hsl(var(--foreground))",
+        marginBottom: "2px",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        maxWidth: "100%",
+      }}>
+        {getDisplayName(entry)}
+      </p>
+
       {/* Email */}
       <p style={{
         fontFamily: "var(--font-sans)",
-        fontSize: "0.72rem",
+        fontSize: "0.62rem",
         color: "hsl(var(--muted-foreground))",
         marginBottom: "10px",
         overflow: "hidden",
@@ -249,7 +286,7 @@ function PodiumCard({ entry, rank }: { entry: { userId: number; email: string; p
   );
 }
 
-function LeaderboardRow({ entry, rank }: { entry: { userId: number; email: string; points: number; reviewCount: number; pyqCount: number }; rank: number }) {
+function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
   return (
     <div
       className="app-card flex items-center gap-3"
@@ -269,25 +306,40 @@ function LeaderboardRow({ entry, rank }: { entry: { userId: number; email: strin
       </span>
 
       {/* Avatar */}
-      <div
-        style={{
-          width: "36px",
-          height: "36px",
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "hsl(var(--primary) / 0.1)",
-          border: "1px solid hsl(var(--primary) / 0.2)",
-          fontSize: "0.85rem",
-          fontWeight: 700,
-          color: "hsl(var(--primary))",
-          fontFamily: "var(--font-display)",
-          flexShrink: 0,
-        }}
-      >
-        {getInitial(entry.email)}
-      </div>
+      {entry.photoUrl ? (
+        <img
+          src={entry.photoUrl}
+          alt={getDisplayName(entry)}
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "50%",
+            objectFit: "cover",
+            border: "1px solid hsl(var(--primary) / 0.2)",
+            flexShrink: 0,
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "hsl(var(--primary) / 0.1)",
+            border: "1px solid hsl(var(--primary) / 0.2)",
+            fontSize: "0.85rem",
+            fontWeight: 700,
+            color: "hsl(var(--primary))",
+            fontFamily: "var(--font-display)",
+            flexShrink: 0,
+          }}
+        >
+          {getInitial(entry)}
+        </div>
+      )}
 
       {/* Info */}
       <div className="flex-1 min-w-0">
@@ -299,6 +351,13 @@ function LeaderboardRow({ entry, rank }: { entry: { userId: number; email: strin
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
+        }}>
+          {getDisplayName(entry)}
+        </p>
+        <p style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "0.68rem",
+          color: "hsl(var(--muted-foreground))",
         }}>
           {maskEmail(entry.email)}
         </p>

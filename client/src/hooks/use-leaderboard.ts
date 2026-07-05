@@ -4,6 +4,8 @@ import { api } from "@shared/routes";
 export interface LeaderboardEntry {
   userId: number;
   email: string;
+  displayName: string | null;
+  photoUrl: string | null;
   reviewCount: number;
   pyqCount: number;
   points: number;
@@ -17,6 +19,6 @@ export function useLeaderboard() {
       if (!res.ok) throw new Error("Failed to fetch leaderboard");
       return res.json();
     },
-    staleTime: 60000, // Cache for 1 minute
+    staleTime: 60000,
   });
 }
