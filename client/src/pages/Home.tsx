@@ -349,7 +349,7 @@ function LeaderboardSection() {
                 >
                   <span style={{
                     width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)",
+                    background: "hsl(var(--primary) / 0.15)", border: "1px solid hsl(var(--primary) / 0.3)",
                     fontFamily: "var(--font-display)", fontSize: "0.65rem", fontWeight: 700, color: "hsl(var(--primary))", flexShrink: 0,
                   }}>{i + 4}</span>
                   {entry.photoUrl ? (
@@ -363,9 +363,11 @@ function LeaderboardSection() {
                     <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.82rem", fontWeight: 600, color: "hsl(var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {entry.displayName || getStudentId(entry.email)}
                     </p>
-                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.65rem", color: "hsl(var(--muted-foreground))" }}>
-                      {getStudentId(entry.email)}
-                    </p>
+                    {entry.displayName && (
+                      <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.65rem", color: "hsl(var(--muted-foreground))" }}>
+                        {getStudentId(entry.email)}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right flex-shrink-0">
                     <span style={{ fontFamily: "var(--font-display)", fontSize: "0.95rem", fontWeight: 800, color: "hsl(var(--foreground))" }}>{entry.points}</span>
@@ -389,7 +391,8 @@ function LeaderboardSection() {
 function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
   const tier = getTier(entry.points);
   const isFirst = rank === 1;
-  const ringColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(220 15% 75%)" : "hsl(25 60% 60%)";
+  const ringColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(265 70% 60%)" : "hsl(330 70% 55%)";
+  const badgeColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(265 70% 60%)" : "hsl(330 70% 55%)";
   const avatarSize = isFirst ? "72px" : "56px";
 
   return (
@@ -405,7 +408,7 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
       <div style={{
         position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)",
         display: "inline-flex", alignItems: "center", gap: "3px", padding: "3px 9px", borderRadius: "9999px",
-        background: ringColor, color: "hsl(0 0% 8%)", fontSize: "0.58rem", fontWeight: 800,
+        background: badgeColor, color: "hsl(0 0% 100%)", fontSize: "0.58rem", fontWeight: 800,
       }}>
         {rank === 1 ? <Crown className="h-3 w-3" /> : <Medal className="h-3 w-3" />}
         #{rank}
@@ -434,9 +437,12 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
       <p style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "0.75rem" : "0.65rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>
         {entry.displayName || getStudentId(entry.email)}
       </p>
-      <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.55rem", color: "hsl(var(--muted-foreground))", marginBottom: "10px" }}>
-        {getStudentId(entry.email)}
-      </p>
+      {entry.displayName && (
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.55rem", color: "hsl(var(--muted-foreground))", marginBottom: "10px" }}>
+          {getStudentId(entry.email)}
+        </p>
+      )}
+      {!entry.displayName && <div style={{ marginBottom: "10px" }} />}
 
       {/* Points */}
       <div style={{ border: "1px solid hsl(var(--border))", borderRadius: "8px", padding: "4px 12px", marginBottom: "4px", background: "hsl(var(--card))" }}>
