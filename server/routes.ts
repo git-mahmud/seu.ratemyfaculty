@@ -306,5 +306,16 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/leaderboard/me", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(200).json({ points: 0, reviewCount: 0 });
+    try {
+      const userId = (req.user as any).id;
+      const myPoints = await storage.getUserPoints(userId);
+      res.json(myPoints);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch points" });
+    }
+  });
+
   return httpServer;
 }

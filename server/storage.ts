@@ -311,6 +311,15 @@ async updateUserGoogleId(id: number, googleId: string): Promise<User | undefined
 
     return leaderboard;
   }
+
+  async getUserPoints(userId: number): Promise<{ points: number; reviewCount: number }> {
+    const [result] = await db
+      .select({ reviewCount: count(reviews.id) })
+      .from(reviews)
+      .where(eq(reviews.studentId, userId));
+    const reviewCount = Number(result?.reviewCount || 0);
+    return { points: reviewCount * 10, reviewCount };
+  }
 }
 
 export const storage = new DatabaseStorage();

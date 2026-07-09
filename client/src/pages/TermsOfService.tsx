@@ -28,7 +28,7 @@ export default function TermsOfService() {
               marginBottom: "40px",
             }}
           >
-            Last updated: June 2026
+            Last updated: July 2026
           </p>
 
           <p
@@ -140,12 +140,14 @@ export default function TermsOfService() {
                   marginBottom: "12px",
                 }}
               >
-                5. Content Moderation
+                5. Contributor Leaderboard
               </h2>
               <p>
-                Platform administrators reserve the right to remove any review, comment, or
-                uploaded content that violates these terms, without prior notice. Repeated
-                violations may result in account suspension.
+                The platform features a public leaderboard that ranks contributors by
+                points earned through submitting reviews (10 points per review). Your
+                display name and profile photo from your Google account may be shown
+                publicly on the leaderboard once your account is linked. The platform
+                administrator's contributions are excluded from the leaderboard rankings.
               </p>
             </section>
 
@@ -159,13 +161,12 @@ export default function TermsOfService() {
                   marginBottom: "12px",
                 }}
               >
-                6. Disclaimer
+                6. Content Moderation
               </h2>
               <p>
-                SEU Rate My Faculty is a student-built platform and is not officially
-                affiliated with or endorsed by Southeast University. All reviews represent
-                the personal opinions of individual students and do not reflect the views
-                of the university or the platform administrators.
+                Platform administrators reserve the right to remove any review, comment, or
+                uploaded content that violates these terms, without prior notice. Repeated
+                violations may result in account suspension.
               </p>
             </section>
 
@@ -179,12 +180,13 @@ export default function TermsOfService() {
                   marginBottom: "12px",
                 }}
               >
-                7. Limitation of Liability
+                7. Disclaimer
               </h2>
               <p>
-                We are not responsible for any decisions made based on content found on
-                this platform. Use the information here as one of many resources in your
-                academic planning.
+                SEU Rate My Faculty is a student-built platform and is not officially
+                affiliated with or endorsed by Southeast University. All reviews represent
+                the personal opinions of individual students and do not reflect the views
+                of the university or the platform administrators.
               </p>
             </section>
 
@@ -198,7 +200,26 @@ export default function TermsOfService() {
                   marginBottom: "12px",
                 }}
               >
-                8. Changes to Terms
+                8. Limitation of Liability
+              </h2>
+              <p>
+                We are not responsible for any decisions made based on content found on
+                this platform. Use the information here as one of many resources in your
+                academic planning.
+              </p>
+            </section>
+
+            <section className="slide-up" style={{ animationDelay: "0.5s" }}>
+              <h2
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  color: "hsl(var(--foreground))",
+                  marginBottom: "12px",
+                }}
+              >
+                9. Changes to Terms
               </h2>
               <p>
                 We reserve the right to update these Terms of Service at any time.
