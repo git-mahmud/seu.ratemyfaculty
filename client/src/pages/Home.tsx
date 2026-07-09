@@ -403,7 +403,7 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
       padding: isFirst ? "20px 8px 16px" : "16px 6px 14px",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
       position: "relative",
-      aspectRatio: "1",
+      aspectRatio: "1 / 1.1",
       justifyContent: "center",
     }}>
       {/* Badge */}
