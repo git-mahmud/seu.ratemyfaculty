@@ -311,8 +311,8 @@ function LeaderboardSection() {
       {/* Main container card */}
       <div style={{
         borderRadius: "20px",
-        border: "1px solid hsl(var(--border))",
-        background: "hsl(var(--card))",
+        border: "1px solid hsl(240 30% 22%)",
+        background: "linear-gradient(180deg, hsl(240 35% 12%) 0%, hsl(250 40% 9%) 100%)",
         overflow: "hidden",
       }}>
         {/* Top 3 Podium */}
@@ -335,7 +335,7 @@ function LeaderboardSection() {
 
         {/* Rows 4-10 */}
         {rest.length > 0 && (
-          <div style={{ borderTop: "1px solid hsl(var(--border))" }}>
+          <div style={{ borderTop: "1px solid hsl(240 30% 20%)" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2">
               {rest.map((entry, i) => (
                 <div
@@ -343,8 +343,8 @@ function LeaderboardSection() {
                   className="flex items-center gap-3"
                   style={{
                     padding: "14px 20px",
-                    borderBottom: "1px solid hsl(var(--border) / 0.5)",
-                    borderRight: i % 2 === 0 ? "1px solid hsl(var(--border) / 0.5)" : "none",
+                    borderBottom: "1px solid hsl(240 30% 18% / 0.7)",
+                    borderRight: i % 2 === 0 ? "1px solid hsl(240 30% 18% / 0.7)" : "none",
                   }}
                 >
                   <span style={{
@@ -391,20 +391,18 @@ function LeaderboardSection() {
 function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
   const tier = getTier(entry.points);
   const isFirst = rank === 1;
-  const ringColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(265 70% 60%)" : "hsl(330 70% 55%)";
-  const badgeColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(265 70% 60%)" : "hsl(330 70% 55%)";
-  const avatarSize = isFirst ? "72px" : "56px";
+  const ringColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(240 60% 55%)" : "hsl(320 65% 55%)";
+  const badgeColor = rank === 1 ? "hsl(10 80% 55%)" : rank === 2 ? "hsl(240 50% 45%)" : "hsl(320 55% 50%)";
+  const avatarSize = isFirst ? "80px" : "64px";
 
   return (
     <div style={{
       borderRadius: "14px",
-      border: "1px solid hsl(var(--border) / 0.6)",
-      background: "hsl(var(--background) / 0.5)",
-      padding: isFirst ? "20px 8px 16px" : "16px 6px 14px",
+      border: "1px solid hsl(240 30% 25% / 0.6)",
+      background: "linear-gradient(180deg, hsl(240 30% 15%) 0%, hsl(240 35% 11%) 100%)",
+      padding: isFirst ? "24px 12px 18px" : "20px 8px 16px",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
       position: "relative",
-      aspectRatio: "1 / 1.1",
-      justifyContent: "center",
     }}>
       {/* Badge */}
       <div style={{
@@ -446,11 +444,11 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
       {!entry.displayName && <div style={{ marginBottom: "10px" }} />}
 
       {/* Points */}
-      <div style={{ border: "1px solid hsl(var(--border))", borderRadius: "8px", padding: "4px 12px", marginBottom: "4px", background: "hsl(var(--card))" }}>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "0.95rem" : "0.8rem", fontWeight: 800, color: "hsl(var(--foreground))" }}>
+      <div style={{ border: `1px solid ${rank === 1 ? "hsl(160 60% 40%)" : "hsl(var(--border))"}`, borderRadius: "8px", padding: "4px 14px", marginBottom: "4px", background: rank === 1 ? "hsl(160 60% 40% / 0.1)" : "hsl(var(--card))" }}>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "1rem" : "0.85rem", fontWeight: 800, color: "hsl(var(--foreground))" }}>
           {entry.points}
         </span>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.5rem", color: "hsl(var(--muted-foreground))", marginLeft: "3px", fontWeight: 600 }}>PTS</span>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.55rem", color: "hsl(var(--muted-foreground))", marginLeft: "4px", fontWeight: 600 }}>PTS</span>
       </div>
       <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.5rem", fontWeight: 700, color: tier.color, letterSpacing: "0.06em" }}>{tier.label}</span>
     </div>
