@@ -51,11 +51,11 @@ export default function Home() {
               borderRadius: "24px",
               border: "1px solid hsl(var(--border))",
               background: "linear-gradient(150deg, hsl(var(--hero-1)) 0%, hsl(var(--hero-2)) 35%, hsl(var(--hero-3)) 65%, hsl(var(--hero-4)) 100%)",
-              padding: "48px 40px",
+              padding: "28px 16px",
             }}
           >
             {/* Grid lines */}
-            <div style={{
+            <div className="hidden sm:block" style={{
               position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
               backgroundImage: "linear-gradient(hsl(0 0% 100% / 0.04) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.04) 1px, transparent 1px)",
               backgroundSize: "32px 32px",
@@ -114,7 +114,7 @@ export default function Home() {
               </p>
 
               {/* Stats row */}
-              <div className="slide-up stagger-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "14px", maxWidth: "520px" }}>
+              <div className="slide-up stagger-3" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", maxWidth: "520px" }}>
                 <StatPill icon={<MessageSquare className="h-4 w-4" />} value={totalReviews} label="Reviews" delay={0} />
                 <StatPill icon={<FileText className="h-4 w-4" />} value={STATS.pyqUploaded} label="PYQ Uploaded" delay={1} />
                 <StatPill icon={<Users className="h-4 w-4" />} value={STATS.usersJoined} label="Users Joined" delay={2} />
