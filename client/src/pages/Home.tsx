@@ -311,12 +311,12 @@ function LeaderboardSection() {
       {/* Main container card */}
       <div style={{
         borderRadius: "20px",
-        border: "1px solid hsl(240 30% 22%)",
-        background: "linear-gradient(180deg, hsl(240 35% 12%) 0%, hsl(250 40% 9%) 100%)",
+        border: "1px solid hsl(210 25% 20%)",
+        background: "hsl(215 30% 11%)",
         overflow: "hidden",
       }}>
         {/* Top 3 Podium */}
-        <div style={{ padding: "28px 16px 24px" }}>
+        <div style={{ padding: "36px 20px 28px" }}>
           <div className="grid grid-cols-3 gap-3 sm:gap-5" style={{ alignItems: "end" }}>
             {/* 2nd */}
             <div>
@@ -335,7 +335,7 @@ function LeaderboardSection() {
 
         {/* Rows 4-10 */}
         {rest.length > 0 && (
-          <div style={{ borderTop: "1px solid hsl(240 30% 20%)" }}>
+          <div style={{ borderTop: "1px solid hsl(210 25% 18%)" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2">
               {rest.map((entry, i) => (
                 <div
@@ -343,8 +343,8 @@ function LeaderboardSection() {
                   className="flex items-center gap-3"
                   style={{
                     padding: "14px 20px",
-                    borderBottom: "1px solid hsl(240 30% 18% / 0.7)",
-                    borderRight: i % 2 === 0 ? "1px solid hsl(240 30% 18% / 0.7)" : "none",
+                    borderBottom: "1px solid hsl(210 25% 16%)",
+                    borderRight: i % 2 === 0 ? "1px solid hsl(210 25% 16%)" : "none",
                   }}
                 >
                   <span style={{
@@ -391,66 +391,72 @@ function LeaderboardSection() {
 function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
   const tier = getTier(entry.points);
   const isFirst = rank === 1;
-  const ringColor = rank === 1 ? "hsl(45 90% 55%)" : rank === 2 ? "hsl(240 60% 55%)" : "hsl(320 65% 55%)";
-  const badgeColor = rank === 1 ? "hsl(10 80% 55%)" : rank === 2 ? "hsl(240 50% 45%)" : "hsl(320 55% 50%)";
-  const avatarSize = isFirst ? "80px" : "64px";
+  const ringColor = rank === 1 ? "hsl(40 80% 45%)" : rank === 2 ? "hsl(210 15% 50%)" : "hsl(30 70% 45%)";
+  const badgeBg = rank === 1 ? "linear-gradient(135deg, hsl(15 90% 55%), hsl(40 90% 50%))" : rank === 2 ? "hsl(215 20% 40%)" : "hsl(25 70% 45%)";
+  const avatarSize = isFirst ? "100px" : "80px";
 
   return (
     <div style={{
-      borderRadius: "14px",
-      border: isFirst ? "1px solid hsl(240 40% 35%)" : "1px solid hsl(240 30% 22%)",
-      background: "linear-gradient(180deg, hsl(240 30% 15%) 0%, hsl(240 35% 11%) 100%)",
-      padding: isFirst ? "28px 12px 20px" : "22px 8px 16px",
+      borderRadius: "16px",
+      border: "1px solid hsl(210 25% 22%)",
+      background: "hsl(210 30% 14%)",
+      padding: "32px 16px 24px",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
       position: "relative",
     }}>
       {/* Badge */}
       <div style={{
-        position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)",
-        display: "inline-flex", alignItems: "center", gap: "3px", padding: "3px 9px", borderRadius: "9999px",
-        background: badgeColor, color: "hsl(0 0% 100%)", fontSize: "0.58rem", fontWeight: 800,
+        position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
+        display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 14px", borderRadius: "9999px",
+        background: badgeBg, color: "white", fontSize: "0.72rem", fontWeight: 800,
       }}>
-        {rank === 1 ? <Crown className="h-3 w-3" /> : <Medal className="h-3 w-3" />}
+        {rank === 1 ? <Crown className="h-3.5 w-3.5" /> : <Medal className="h-3.5 w-3.5" />}
         #{rank}
       </div>
 
       {/* Avatar */}
       {entry.photoUrl ? (
         <img src={entry.photoUrl} alt="" style={{
-          width: avatarSize, height: avatarSize, borderRadius: "50%", border: `3px solid ${ringColor}`,
-          objectFit: "cover", marginTop: "8px", marginBottom: "8px",
+          width: avatarSize, height: avatarSize, borderRadius: "50%", border: `4px solid ${ringColor}`,
+          objectFit: "cover", marginTop: "12px", marginBottom: "12px",
         }} />
       ) : (
         <div style={{
-          width: avatarSize, height: avatarSize, borderRadius: "50%", border: `3px solid ${ringColor}`,
-          display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--secondary))",
-          marginTop: "8px", marginBottom: "8px",
+          width: avatarSize, height: avatarSize, borderRadius: "50%", border: `4px solid ${ringColor}`,
+          display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(210 25% 18%)",
+          marginTop: "12px", marginBottom: "12px",
         }}>
-          <GraduationCap style={{ width: isFirst ? "28px" : "22px", height: isFirst ? "28px" : "22px", color: "hsl(var(--primary))" }} />
+          <GraduationCap style={{ width: isFirst ? "36px" : "28px", height: isFirst ? "36px" : "28px", color: "hsl(210 15% 55%)" }} />
         </div>
       )}
 
-      <Star className="h-3.5 w-3.5" style={{ color: "hsl(45 90% 55%)", fill: "hsl(45 90% 55%)", marginBottom: "6px" }} />
+      {/* Star */}
+      <span style={{ fontSize: "1.2rem", marginBottom: "10px" }}>&#11088;</span>
 
       {/* Name */}
-      <p style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "0.75rem" : "0.65rem", fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>
+      <p style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "0.9rem" : "0.78rem", fontWeight: 700, color: "hsl(0 0% 92%)", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 4px" }}>
         {entry.displayName || getStudentId(entry.email)}
       </p>
       {entry.displayName && (
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.55rem", color: "hsl(var(--muted-foreground))", marginBottom: "10px" }}>
+        <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.65rem", color: "hsl(210 15% 55%)", marginBottom: "14px" }}>
           {getStudentId(entry.email)}
         </p>
       )}
-      {!entry.displayName && <div style={{ marginBottom: "10px" }} />}
+      {!entry.displayName && <div style={{ marginBottom: "14px" }} />}
 
-      {/* Points */}
-      <div style={{ border: `1px solid ${rank === 1 ? "hsl(160 60% 40%)" : "hsl(var(--border))"}`, borderRadius: "8px", padding: "4px 14px", marginBottom: "4px", background: rank === 1 ? "hsl(160 60% 40% / 0.1)" : "hsl(var(--card))" }}>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "1rem" : "0.85rem", fontWeight: 800, color: "hsl(var(--foreground))" }}>
+      {/* Points pill */}
+      <div style={{
+        background: "linear-gradient(135deg, hsl(250 50% 35%), hsl(260 45% 45%))",
+        border: "1px solid hsl(250 40% 50% / 0.4)",
+        borderRadius: "20px", padding: "6px 18px",
+        marginBottom: "6px",
+      }}>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: isFirst ? "1rem" : "0.85rem", fontWeight: 800, color: "hsl(45 90% 60%)" }}>
           {entry.points}
         </span>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.55rem", color: "hsl(var(--muted-foreground))", marginLeft: "4px", fontWeight: 600 }}>PTS</span>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.6rem", color: "hsl(0 0% 80%)", marginLeft: "5px", fontWeight: 600 }}>PTS</span>
       </div>
-      <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.5rem", fontWeight: 700, color: tier.color, letterSpacing: "0.06em" }}>{tier.label}</span>
+      <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.6rem", fontWeight: 700, color: tier.color, letterSpacing: "0.06em" }}>{tier.label}</span>
     </div>
   );
 }
