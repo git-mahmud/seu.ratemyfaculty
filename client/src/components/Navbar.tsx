@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { GraduationCap, LogOut, ShieldCheck, LogIn, Menu, Heart, Trophy } from "lucide-react";
+import { GraduationCap, LogOut, ShieldCheck, LogIn, Menu, Heart } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -132,16 +132,6 @@ export function Navbar({ search = "", onSearch }: NavbarProps) {
                     >
                       <Heart className="mr-2 h-4 w-4" style={{ color: "hsl(0 70% 60%)" }} />
                       My Favorites
-                    </DropdownMenuItem>
-                  </Link>
-
-                  <Link href="/leaderboard">
-                    <DropdownMenuItem
-                      className="cursor-pointer px-3 py-2"
-                      style={{ fontFamily: "var(--font-sans)", fontSize: "0.85rem", color: "hsl(var(--foreground))" }}
-                    >
-                      <Trophy className="mr-2 h-4 w-4" style={{ color: "hsl(45 90% 55%)" }} />
-                      Leaderboard
                     </DropdownMenuItem>
                   </Link>
 

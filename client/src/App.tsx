@@ -13,7 +13,6 @@ import Favorites from "@/pages/Favorites";
 import About from "@/pages/About";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
-import Leaderboard from "@/pages/Leaderboard";
 import NotFound from "@/pages/not-found";
 
 function ScrollToTop() {
@@ -37,7 +36,6 @@ function Router() {
         <Route path="/about" component={About} />
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/terms" component={TermsOfService} />
-        <Route path="/leaderboard" component={Leaderboard} />
         <Route component={NotFound} />
       </Switch>
     </>
