@@ -4,7 +4,7 @@ import { useLeaderboard, type LeaderboardEntry } from "@/hooks/use-leaderboard";
 import { Navbar } from "@/components/Navbar";
 import { TeacherCard } from "@/components/TeacherCard";
 import { Footer } from "@/components/Footer";
-import { Search, MessageSquare, FileText, Users, Trophy, Star, Medal, Crown } from "lucide-react";
+import { Search, MessageSquare, FileText, Users, Trophy, Star, Medal, Crown, GraduationCap } from "lucide-react";
 
 // ── Hardcoded stats (update manually) ──
 const STATS = {
@@ -355,8 +355,8 @@ function LeaderboardSection() {
                   {entry.photoUrl ? (
                     <img src={entry.photoUrl} alt="" style={{ width: "34px", height: "34px", borderRadius: "50%", objectFit: "cover", border: "2px solid hsl(var(--border))", flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: "34px", height: "34px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--primary) / 0.1)", border: "2px solid hsl(var(--border))", fontSize: "0.8rem", fontWeight: 700, color: "hsl(var(--primary))", fontFamily: "var(--font-display)", flexShrink: 0 }}>
-                      {getInitial(entry)}
+                    <div style={{ width: "34px", height: "34px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--primary) / 0.1)", border: "2px solid hsl(var(--border))", flexShrink: 0 }}>
+                      <GraduationCap style={{ width: "16px", height: "16px", color: "hsl(var(--primary))" }} />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -403,6 +403,8 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
       padding: isFirst ? "20px 8px 16px" : "16px 6px 14px",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
       position: "relative",
+      aspectRatio: "1",
+      justifyContent: "center",
     }}>
       {/* Badge */}
       <div style={{
@@ -424,10 +426,9 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
         <div style={{
           width: avatarSize, height: avatarSize, borderRadius: "50%", border: `3px solid ${ringColor}`,
           display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--secondary))",
-          fontSize: isFirst ? "1.4rem" : "1.1rem", fontWeight: 800, color: "hsl(var(--primary))", fontFamily: "var(--font-display)",
           marginTop: "8px", marginBottom: "8px",
         }}>
-          {getInitial(entry)}
+          <GraduationCap style={{ width: isFirst ? "28px" : "22px", height: isFirst ? "28px" : "22px", color: "hsl(var(--primary))" }} />
         </div>
       )}
 
