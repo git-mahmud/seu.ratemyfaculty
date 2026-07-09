@@ -317,9 +317,9 @@ function LeaderboardSection() {
       }}>
         {/* Top 3 Podium */}
         <div style={{ padding: "28px 16px 24px" }}>
-          <div className="grid grid-cols-3 gap-3 sm:gap-5">
+          <div className="grid grid-cols-3 gap-3 sm:gap-5" style={{ alignItems: "end" }}>
             {/* 2nd */}
-            <div className="pt-4 sm:pt-6">
+            <div>
               {top3[1] && <PodiumCardLB entry={top3[1]} rank={2} />}
             </div>
             {/* 1st */}
@@ -327,7 +327,7 @@ function LeaderboardSection() {
               {top3[0] && <PodiumCardLB entry={top3[0]} rank={1} />}
             </div>
             {/* 3rd */}
-            <div className="pt-6 sm:pt-8">
+            <div>
               {top3[2] && <PodiumCardLB entry={top3[2]} rank={3} />}
             </div>
           </div>
@@ -398,9 +398,9 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
   return (
     <div style={{
       borderRadius: "14px",
-      border: "1px solid hsl(240 30% 25% / 0.6)",
+      border: isFirst ? "1px solid hsl(240 40% 35%)" : "1px solid hsl(240 30% 22%)",
       background: "linear-gradient(180deg, hsl(240 30% 15%) 0%, hsl(240 35% 11%) 100%)",
-      padding: isFirst ? "24px 12px 18px" : "20px 8px 16px",
+      padding: isFirst ? "28px 12px 20px" : "22px 8px 16px",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
       position: "relative",
     }}>
