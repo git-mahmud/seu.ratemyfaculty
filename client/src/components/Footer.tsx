@@ -427,8 +427,8 @@ export function Footer() {
             borderTop: "1px solid hsl(var(--border) / 0.5)",
             background: "hsl(var(--background) / 0.4)",
             borderRadius: "12px 12px 0 0",
-            margin: "0 -16px",
-            padding: "0 16px",
+            margin: "0 -24px",
+            padding: "0 24px",
           }}
         >
           <div

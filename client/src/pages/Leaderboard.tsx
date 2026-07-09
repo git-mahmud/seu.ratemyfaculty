@@ -99,14 +99,14 @@ export default function Leaderboard() {
         ) : (
           <>
             {/* ═══ Top 3 Podium ═══ */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 slide-up stagger-2">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8 slide-up stagger-2">
               {/* 2nd place — Silver */}
               <div className="pt-6 sm:pt-8">
                 {top3[1] && (
                   <div
                     className="h-full flex flex-col items-center text-center"
                     style={{
-                      padding: "16px 6px 14px",
+                      padding: "20px 10px 18px",
                       position: "relative",
                       overflow: "hidden",
                       borderRadius: "var(--radius)",
@@ -133,7 +133,7 @@ export default function Leaderboard() {
                   <div
                     className="h-full flex flex-col items-center text-center"
                     style={{
-                      padding: "18px 6px 16px",
+                      padding: "24px 10px 20px",
                       position: "relative",
                       overflow: "hidden",
                       borderRadius: "var(--radius)",
@@ -160,7 +160,7 @@ export default function Leaderboard() {
                   <div
                     className="h-full flex flex-col items-center text-center"
                     style={{
-                      padding: "16px 6px 14px",
+                      padding: "20px 10px 18px",
                       position: "relative",
                       overflow: "hidden",
                       borderRadius: "var(--radius)",
@@ -216,7 +216,7 @@ function PodiumCard({ entry, rank }: { entry: LeaderboardEntry; rank: number }) 
     : rank === 2
       ? "hsl(220 15% 75%)"
       : "hsl(25 60% 60%)";
-  const avatarSize = isFirst ? "60px" : rank === 2 ? "48px" : "44px";
+  const avatarSize = isFirst ? "76px" : rank === 2 ? "60px" : "52px";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
@@ -293,7 +293,7 @@ function PodiumCard({ entry, rank }: { entry: LeaderboardEntry; rank: number }) 
       {/* Name */}
       <p style={{
         fontFamily: "var(--font-display)",
-        fontSize: isFirst ? "0.7rem" : "0.62rem",
+        fontSize: isFirst ? "0.78rem" : "0.7rem",
         fontWeight: 700,
         color: "hsl(var(--hero-text))",
         marginBottom: "2px",
@@ -301,7 +301,7 @@ function PodiumCard({ entry, rank }: { entry: LeaderboardEntry; rank: number }) 
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
         maxWidth: "100%",
-        padding: "0 2px",
+        padding: "0 4px",
       }}>
         {getDisplayName(entry)}
       </p>
@@ -309,14 +309,14 @@ function PodiumCard({ entry, rank }: { entry: LeaderboardEntry; rank: number }) 
       {/* Email */}
       <p style={{
         fontFamily: "var(--font-sans)",
-        fontSize: "0.5rem",
+        fontSize: "0.56rem",
         color: "hsl(var(--hero-subtext) / 0.8)",
-        marginBottom: "10px",
+        marginBottom: "12px",
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
         maxWidth: "100%",
-        padding: "0 2px",
+        padding: "0 4px",
       }}>
         {maskEmail(entry.email)}
       </p>
@@ -325,14 +325,14 @@ function PodiumCard({ entry, rank }: { entry: LeaderboardEntry; rank: number }) 
       <div style={{
         background: "hsl(var(--card))",
         border: "1px solid hsl(var(--border))",
-        borderRadius: "10px",
-        padding: "4px 10px",
-        marginBottom: "4px",
+        borderRadius: "12px",
+        padding: "6px 16px",
+        marginBottom: "5px",
         boxShadow: "0 4px 12px hsl(0 0% 0% / 0.3)",
       }}>
         <span style={{
           fontFamily: "var(--font-display)",
-          fontSize: isFirst ? "0.95rem" : "0.8rem",
+          fontSize: isFirst ? "1.1rem" : "0.9rem",
           fontWeight: 800,
           background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))",
           WebkitBackgroundClip: "text",
