@@ -5,6 +5,56 @@ interface Message {
   content: string;
 }
 
+function renderMessageText(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, lineIndex) => {
+    const driveRegex = /(https:\/\/drive\.google\.com\/[^\s]+)/g;
+    const parts = line.split(driveRegex);
+
+    if (parts.length === 1) {
+      return <span key={lineIndex}>{line}<br/></span>;
+    }
+
+    return (
+      <span key={lineIndex}>
+        {parts.map((part, i) => {
+          if (part.startsWith("https://drive.google.com/")) {
+            const labelMatch = line.match(/([A-Z]{2,}[\w\d_\s]*(?:Mid|Final|Quiz)[\w\s\d]*?):/i);
+            const label = labelMatch ? labelMatch[1].trim() : "View PYQ";
+            return (
+              <a
+                key={i}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  background: "hsl(var(--primary) / 0.15)",
+                  border: "1px solid hsl(var(--primary) / 0.3)",
+                  borderRadius: "8px",
+                  padding: "4px 10px",
+                  color: "hsl(var(--primary))",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  margin: "2px 0",
+                }}
+              >
+                {"\ud83d\udcc4"} {label}
+              </a>
+            );
+          }
+          return <span key={i}>{part}</span>;
+        })}
+        <br/>
+      </span>
+    );
+  });
+}
+
 export function KittyAI() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -211,7 +261,7 @@ export function KittyAI() {
                       fontFamily: "var(--font-sans)", fontSize: "0.88rem", lineHeight: 1.6,
                       whiteSpace: "pre-line", wordBreak: "break-word",
                     }}>
-                      {msg.content}
+                      {msg.role === "kitty" ? renderMessageText(msg.content) : msg.content}
                     </div>
                   </div>
                 ))}
