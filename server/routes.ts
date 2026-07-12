@@ -437,7 +437,7 @@ export async function registerRoutes(
             method: "POST",
             headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-              model: "llama3-8b-8192",
+              model: "llama-3.1-8b-instant",
               messages: [
                 { role: "system", content: `You are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty. You help students understand faculty based on real reviews.\n\nRules:\n- Mention overall personality based on review majority\n- Summarize marking style honestly\n- Mention exam difficulty\n- Say who they're best for\n- Quote 1-2 student comments if relevant\n- Share PYQ links if available\n- Be friendly, concise, honest\n- Never make up info` },
                 { role: "user", content: `User asked: "${message}"\n\nDatabase data:\n${context}` }
@@ -466,7 +466,7 @@ export async function registerRoutes(
           method: "POST",
           headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "llama3-8b-8192",
+            model: "llama-3.1-8b-instant",
             messages: [
               { role: "system", content: `You are Kitty, a cute AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. Faculty count: ${teachers.length}. Help users search faculty by name, ask about reviews/PYQs, and how the platform works. If they ask about a specific faculty, tell them to mention the name. Be friendly and concise.` },
               { role: "user", content: message }
