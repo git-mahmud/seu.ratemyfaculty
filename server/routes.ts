@@ -321,7 +321,7 @@ export async function registerRoutes(
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { message, customApiKey } = req.body;
+      const { message, customApiKey, courseContext } = req.body;
       if (!message || typeof message !== "string") {
         return res.status(400).json({ reply: "Please provide a message." });
       }
@@ -366,7 +366,8 @@ export async function registerRoutes(
         const courseMatch = message.match(/\b([A-Z]{2,3}\d{3})\b/i);
         const courseName = courseMatch ? courseMatch[1].toUpperCase() : "that course";
         return res.json({
-          reply: `Great! Let me help you find the best faculty for ${courseName} \ud83c\udf93\n\nBefore I suggest, tell me \u2014 what matters most to you?\n\n1\uFE0F\u20E3 Good marks \u2014 easy marking, lenient, student friendly\n2\uFE0F\u20E3 Actually learn \u2014 teaches well, explains clearly, engaging\n3\uFE0F\u20E3 Easy exams \u2014 simple questions, predictable pattern\n4\uFE0F\u20E3 Chill semester \u2014 friendly personality, no stress\n\nJust reply with the number or describe what you want!`
+          reply: `Great! Let me help you find the best faculty for ${courseName} \ud83c\udf93\n\nBefore I suggest, tell me \u2014 what matters most to you?\n\n1\uFE0F\u20E3 Good marks \u2014 easy marking, lenient, student friendly\n2\uFE0F\u20E3 Actually learn \u2014 teaches well, explains clearly, engaging\n3\uFE0F\u20E3 Easy exams \u2014 simple questions, predictable pattern\n4\uFE0F\u20E3 Chill semester \u2014 friendly personality, no stress\n\nJust reply with the number or describe what you want!\n\n[COURSE_CONTEXT:${courseName}]`,
+          courseContext: courseName
         });
       }
 
@@ -388,8 +389,20 @@ export async function registerRoutes(
         const pref = preferenceType || prefKeywords[query.trim() as keyof typeof prefKeywords];
         if (pref) {
           try {
+            // Filter by course if courseContext exists
+            let eligibleTeachers = teachers;
+            if (courseContext) {
+              const courseWords = courseContext.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+              const courseFiltered = teachers.filter((t: any) =>
+                t.coursesTaught.some((course: string) =>
+                  courseWords.some((word: string) => course.toLowerCase().includes(word))
+                )
+              );
+              if (courseFiltered.length > 0) eligibleTeachers = courseFiltered;
+            }
+
             const scoredTeachers: { teacher: any; score: number; reason: string }[] = [];
-            for (const t of teachers) {
+            for (const t of eligibleTeachers) {
               if (t.reviewCount < 5) continue;
               const revs = await storage.getReviewsByTeacherId(t.id);
               let score = 0;

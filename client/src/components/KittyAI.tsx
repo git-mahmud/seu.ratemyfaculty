@@ -61,6 +61,7 @@ export function KittyAI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [courseContext, setCourseContext] = useState<string | null>(null);
   const [customKey, setCustomKey] = useState(() => {
     try { return localStorage.getItem("kitty_custom_api_key") || ""; } catch { return ""; }
   });
@@ -87,6 +88,7 @@ export function KittyAI() {
       const body: any = { message: userMsg };
       const storedKey = localStorage.getItem("kitty_custom_api_key");
       if (storedKey) body.customApiKey = storedKey;
+      if (courseContext) body.courseContext = courseContext;
 
       const res = await fetch("/api/ai/chat", {
         method: "POST",
@@ -94,8 +96,17 @@ export function KittyAI() {
         body: JSON.stringify(body),
       });
       const data = await res.json();
+
+      // Store courseContext if returned
+      if (data.courseContext) {
+        setCourseContext(data.courseContext);
+      } else {
+        setCourseContext(null);
+      }
+
       const rawReply = data.reply || "Hmm, I got nothing. Try again?";
       const cleanReply = rawReply
+        .replace(/\[COURSE_CONTEXT:[^\]]*\]/g, "")
         .replace(/\*\*(.*?)\*\*/g, "$1")
         .replace(/\*(.*?)\*/g, "$1")
         .replace(/#{1,6} /g, "")
