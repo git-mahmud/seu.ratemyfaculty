@@ -571,6 +571,13 @@ export async function registerRoutes(
         }
 
         if (teacherReviews.length < 5) {
+          // Still provide PYQs even with less than 5 reviews
+          if (teacherPyqs.length > 0) {
+            const pyqList = teacherPyqs.map((p: any) => `${p.courseCode} ${p.examType} ${p.year} ${p.semester}: ${p.fileUrl}`).join("\n");
+            return res.json({
+              reply: `I don't have enough reviews about ${resolvedTeacher.fullName} yet for a full summary (only ${teacherReviews.length} so far, need 5). But here are their available PYQs:\n\n${pyqList}\n\nBe the first to review this faculty!`
+            });
+          }
           return res.json({
             reply: `I don't have enough data about ${resolvedTeacher.fullName} yet. We need at least 5 reviews for an accurate summary. Currently there are only ${teacherReviews.length} review(s). Be the first to review!`
           });
