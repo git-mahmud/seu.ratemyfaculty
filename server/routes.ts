@@ -353,6 +353,86 @@ export async function registerRoutes(
       const query = message.toLowerCase();
       let resolvedTeacher: any = null;
 
+      // Multi-turn: Faculty recommendation conversation flow
+      const wantsRecommendation = /\b(best|recommend|suggest|who should|which faculty|good for|suitable|help me find|find me|find a)\b/i.test(message);
+      const wantsFacultyForCourse = /\b(best|good|which|who|suggest|recommend|help|find).{0,30}(faculty|teacher|sir|ma'am|professor).{0,30}(for|in|cse|mat|eng|phy|bba|\d{2,3})\b/i.test(message) ||
+        /\b(faculty|teacher).{0,20}(cse|mat|eng|phy|bba|course|\d{3})\b/i.test(message) ||
+        (/\b(cse|mat|eng|phy|bba)\d{3}\b/i.test(message) && wantsRecommendation);
+
+      const hasPreference = /\b(marks|learn|strict|friendly|easy|hard|chill|no stress|lenient|open minded)\b/i.test(query);
+
+      if (wantsFacultyForCourse && !hasPreference) {
+        const courseMatch = message.match(/\b([A-Z]{2,3}\d{3})\b/i);
+        const courseName = courseMatch ? courseMatch[1].toUpperCase() : "that course";
+        return res.json({
+          reply: `Great! Let me help you find the best faculty for ${courseName} \ud83c\udf93\n\nBefore I suggest, tell me \u2014 what matters most to you?\n\n1\uFE0F\u20E3 Good marks \u2014 easy marking, lenient, student friendly\n2\uFE0F\u20E3 Actually learn \u2014 teaches well, explains clearly, engaging\n3\uFE0F\u20E3 Easy exams \u2014 simple questions, predictable pattern\n4\uFE0F\u20E3 Chill semester \u2014 friendly personality, no stress\n\nJust reply with the number or describe what you want!`
+        });
+      }
+
+      // Multi-turn: Handle preference reply (1, 2, 3, 4 or keywords)
+      const preferenceMatch = /^[1-4]$/.test(query.trim());
+      const prefKeywords = {
+        marks: "Open-minded", "good marks": "Open-minded", "1": "Open-minded",
+        learn: "learning", learning: "learning", "2": "learning",
+        "easy exam": "Easy", easy: "Easy", "3": "Easy",
+        chill: "Friendly", friendly: "Friendly", "no stress": "Friendly", "4": "Friendly",
+      };
+
+      let preferenceType: string | null = null;
+      for (const [kw, val] of Object.entries(prefKeywords)) {
+        if (query.trim() === kw || query.includes(kw)) { preferenceType = val; break; }
+      }
+
+      if ((preferenceMatch || preferenceType) && !resolvedTeacher) {
+        const pref = preferenceType || prefKeywords[query.trim() as keyof typeof prefKeywords];
+        if (pref) {
+          try {
+            const scoredTeachers: { teacher: any; score: number; reason: string }[] = [];
+            for (const t of teachers) {
+              if (t.reviewCount < 5) continue;
+              const revs = await storage.getReviewsByTeacherId(t.id);
+              let score = 0;
+              let reason = "";
+
+              if (pref === "Open-minded") {
+                score = revs.filter((r: any) => r.markingStyle === "Open-minded").length;
+                reason = "lenient marking";
+              } else if (pref === "learning") {
+                score = revs.filter((r: any) => r.comment && r.comment.length > 20).length;
+                reason = "good teaching";
+              } else if (pref === "Easy") {
+                score = revs.filter((r: any) => r.questionDifficulty === "Easy").length;
+                reason = "easy exams";
+              } else if (pref === "Friendly") {
+                score = revs.filter((r: any) => r.personality === "Friendly").length;
+                reason = "friendly personality";
+              }
+
+              if (score > 0) scoredTeachers.push({ teacher: t, score, reason });
+            }
+
+            scoredTeachers.sort((a, b) => b.score - a.score);
+            const top3 = scoredTeachers.slice(0, 3);
+
+            if (top3.length === 0) {
+              return res.json({ reply: "I couldn't find enough faculty with that preference and enough reviews. Try asking differently!" });
+            }
+
+            const reply = top3.map((item, i) => {
+              const initMatch = item.teacher.fullName.match(/\[([A-Z]+)\]/i);
+              const initials = initMatch ? `[${initMatch[1]}]` : "";
+              return `${i + 1}. ${item.teacher.fullName.replace(/\[.*?\]/, "").trim()} ${initials} - Known for ${item.reason} (${item.score}/${item.teacher.reviewCount} reviews agree)`;
+            }).join("\n\n");
+
+            return res.json({
+              reply: `Based on your preference, here are my top picks:\n\n${reply}\n\nWant me to tell you more about any of them? Just mention their name or initials!`
+            });
+          } catch (e) {
+            console.error("AI Chat preference handling error:", e);
+          }
+        }
+      }
+
       // Step 1: Build initial map from all teachers
       const initialMap: Record<string, any> = {};
       teachers.forEach(t => {
@@ -589,7 +669,7 @@ export async function registerRoutes(
           body: JSON.stringify({
             model: "llama-3.1-8b-instant",
             messages: [
-              { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Never say you were made by Groq, Meta, or any tech company. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal, short, and misspelled messages from Bangladeshi university students. If someone writes 'fbh pyq' understand they want PYQs for FBH. If someone writes 'who strict cse' understand they want strict faculty in CSE. If someone writes 'help me find a faculty' ask them what subject or criteria they need. If someone writes 'help me find a pyq' ask them which faculty or course they need. Always try to understand intent even if grammar is broken, words are missing, or spellings are wrong. Never say you don't understand — always try your best to help.\n\nYou are Kitty, a cute AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. Faculty count: ${teachers.length}. Help users search faculty by name, ask about reviews/PYQs, and how the platform works. If they ask about a specific faculty, tell them to mention the name. Be friendly and concise. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Never introduce yourself in every response. Get straight to the answer. Keep responses under 150 words. If anyone asks who made you, who created you, who built you, or who is your developer/creator, always answer: 'I was built by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He created SEU Rate My Faculty to help students like you make better academic decisions! 🐱'` },
+              { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Never say you were made by Groq, Meta, or any tech company. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal, short, and misspelled messages from Bangladeshi university students. If someone writes 'fbh pyq' understand they want PYQs for FBH. If someone writes 'who strict cse' understand they want strict faculty in CSE. If someone writes 'help me find a faculty' ask them what subject or criteria they need. If someone writes 'help me find a pyq' ask them which faculty or course they need. Always try to understand intent even if grammar is broken, words are missing, or spellings are wrong. Never say you don't understand — always try your best to help.\n\nYou are Kitty, a cute AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. Faculty count: ${teachers.length}. Help users search faculty by name, ask about reviews/PYQs, and how the platform works. If they ask about a specific faculty, tell them to mention the name. When a student tells you their preference (like good marks, learning, easy exams, chill), understand they are continuing a conversation about finding a faculty. Match their preference to review data and suggest the top 3 faculty with explanation. Be friendly and concise. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Never introduce yourself in every response. Get straight to the answer. Keep responses under 150 words. If anyone asks who made you, who created you, who built you, or who is your developer/creator, always answer: 'I was built by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He created SEU Rate My Faculty to help students like you make better academic decisions! 🐱'` },
               { role: "user", content: message }
             ],
             temperature: 0.7,
