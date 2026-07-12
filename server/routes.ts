@@ -482,6 +482,69 @@ export async function registerRoutes(
         }
       }
 
+      // Step 3.5: Course-based faculty search (if no name/initial matched)
+      if (!resolvedTeacher) {
+        const courseStopWords = ["suggest", "best", "faculty", "for", "me", "find", "who", "teaches", "teach", "taking", "which", "is", "good", "recommend", "want", "help", "the", "and", "tell", "about", "how"];
+        const courseQueryWords = message.toLowerCase()
+          .replace(/[^a-z0-9\s]/g, "")
+          .split(/\s+/)
+          .filter((w: string) => w.length > 2 && !courseStopWords.includes(w));
+
+        const courseMatches = teachers.filter((t: any) =>
+          t.coursesTaught.some((course: string) =>
+            courseQueryWords.some((word: string) => course.toLowerCase().includes(word))
+          )
+        );
+
+        if (courseMatches.length > 0) {
+          try {
+            const teachersWithReviews = await Promise.all(
+              courseMatches.map(async (t: any) => {
+                const reviews = await storage.getReviewsByTeacherId(t.id);
+                const pyqs = await storage.getPyqsByTeacherId(t.id);
+                return { teacher: t, reviews, pyqs };
+              })
+            );
+
+            const qualified = teachersWithReviews.filter(t => t.reviews.length >= 5);
+
+            if (qualified.length === 0) {
+              return res.json({ reply: `I found ${courseMatches.length} faculty who teach that course, but none have enough reviews yet (minimum 5 needed). The faculty are: ${courseMatches.map((t: any) => t.fullName).join(", ")}. Be the first to review them!` });
+            }
+
+            const courseContext = qualified.map(({ teacher, reviews, pyqs }) => {
+              const reviewSummary = reviews.map((r: any) =>
+                `Personality: ${r.personality}, Marking: ${r.markingStyle}, Difficulty: ${r.questionDifficulty}, Best for: ${r.bestFor || "N/A"}, Comment: ${r.comment || "none"}`
+              ).join("\n");
+              const pyqList = pyqs.map((p: any) => `${p.courseCode} ${p.examType} ${p.year} ${p.semester}: ${p.fileUrl}`).join("\n");
+              return `Faculty: ${teacher.fullName} (${teacher.department})\nReviews (${reviews.length}):\n${reviewSummary}\nPYQs:\n${pyqList || "None available"}`;
+            }).join("\n\n---\n\n");
+
+            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [
+                  { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal messages from Bangladeshi university students. You are Kitty, a cute AI assistant for SEU Rate My Faculty. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Keep responses under 200 words. Suggest the best faculty based on the reviews. Rank them and explain briefly why each is good or not. Be like a senior student giving advice.` },
+                  { role: "user", content: `Student question: ${message}\n\nHere are the faculty who teach this course with their reviews:\n${courseContext}\n\nSuggest the best faculty based on the reviews. Rank them and explain briefly.` }
+                ],
+                max_tokens: 500,
+                temperature: 0.7,
+              }),
+            });
+            console.log("AI Chat course-search Groq status:", groqRes.status);
+            if (groqRes.ok) {
+              const groqData = await groqRes.json();
+              const reply = groqData.choices?.[0]?.message?.content || "I couldn't generate a response.";
+              return res.json({ reply });
+            }
+          } catch (e) {
+            console.error("AI Chat course search error:", e);
+          }
+        }
+      }
+
       // Step 4: If teacher found, fetch their data
       if (resolvedTeacher) {
         let teacherReviews: any[] = [];
