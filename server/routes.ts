@@ -317,5 +317,152 @@ export async function registerRoutes(
     }
   });
 
+  // === AI CHAT ===
+
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message } = req.body;
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ reply: "Please provide a message." });
+      }
+
+      const teachers = await storage.getTeachers();
+      const query = message.toLowerCase();
+
+      // Find matching teachers by name (case-insensitive partial match)
+      const matchedTeachers = teachers.filter(t =>
+        t.fullName.toLowerCase().includes(query.split(" ").filter(w => w.length > 2).join(" ")) ||
+        query.split(" ").filter(w => w.length > 2).some(word => t.fullName.toLowerCase().includes(word))
+      );
+
+      // Also check for initials in brackets like [MBH]
+      const initialsMatch = message.match(/\[([A-Z]+)\]/);
+      let resolvedTeacher = null;
+
+      if (initialsMatch) {
+        const initials = initialsMatch[1];
+        resolvedTeacher = teachers.find(t => t.fullName.includes(`[${initials}]`)) || null;
+      }
+
+      // If no initials provided, check matched teachers
+      if (!resolvedTeacher && matchedTeachers.length === 1) {
+        resolvedTeacher = matchedTeachers[0];
+      } else if (!resolvedTeacher && matchedTeachers.length > 1) {
+        // Ambiguity — ask for clarification
+        const options = matchedTeachers.map(t => {
+          const bracketMatch = t.fullName.match(/\[([A-Z]+)\]/);
+          const initials = bracketMatch ? `[${bracketMatch[1]}]` : "";
+          return `${initials} ${t.fullName}`;
+        }).join(" or ");
+        return res.json({
+          reply: `I found multiple faculty members matching that name. Could you specify which one?\n\n${options}\n\nYou can use their initials in brackets to be specific!`
+        });
+      }
+
+      // If we have a resolved teacher, fetch their data
+      if (resolvedTeacher) {
+        const teacherReviews = await storage.getReviewsByTeacherId(resolvedTeacher.id);
+        const teacherPyqs = await storage.getPyqsByTeacherId(resolvedTeacher.id);
+
+        // Minimum review check
+        if (teacherReviews.length < 5) {
+          return res.json({
+            reply: `I don't have enough data about ${resolvedTeacher.fullName} yet. We need at least 5 reviews to give you an accurate summary. Currently there are only ${teacherReviews.length} review(s). Be the first to contribute!`
+          });
+        }
+
+        // Build context for Groq
+        const reviewsContext = teacherReviews.map((r, i) =>
+          `Review ${i + 1}: Personality: ${r.personality}, Marking: ${r.markingStyle}, Difficulty: ${r.questionDifficulty}, Best For: ${(r as any).bestFor}, Course: ${r.courseTaken}${r.comment ? `, Comment: "${r.comment}"` : ""}`
+        ).join("\n");
+
+        const pyqContext = teacherPyqs.length > 0
+          ? "\nAvailable PYQs:\n" + teacherPyqs.map(p =>
+            `- ${p.courseCode} ${p.examType} ${p.year} (${p.semester}): ${p.fileUrl}`
+          ).join("\n")
+          : "\nNo PYQs available for this faculty.";
+
+        const context = `Faculty: ${resolvedTeacher.fullName}\nDepartment: ${resolvedTeacher.department}\nUniversity: ${resolvedTeacher.university}\nCourses: ${resolvedTeacher.coursesTaught.join(", ")}\nTotal Reviews: ${teacherReviews.length}\n\n${reviewsContext}\n${pyqContext}`;
+
+        // Call Groq
+        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "llama3-8b-8192",
+            messages: [
+              {
+                role: "system",
+                content: `You are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. You help students understand faculty based on real student reviews.
+
+When summarizing a faculty:
+- Mention their overall personality (friendly/strict/neutral) based on majority of reviews
+- Summarize their marking style honestly
+- Mention exam difficulty level
+- Say who they are best suited for (strong/average/weak students)
+- Quote 1-2 interesting student comments if relevant
+- If PYQ links are available, share them clearly
+- Keep tone friendly, honest, and helpful
+- Be concise — don't write essays
+- Never make up information. Only use the data provided to you.
+- If data is insufficient, say so honestly`
+              },
+              {
+                role: "user",
+                content: `User asked: "${message}"\n\nHere is the real data from our database:\n\n${context}`
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 800,
+          }),
+        });
+
+        if (!groqResponse.ok) {
+          return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+        }
+
+        const groqData = await groqResponse.json();
+        const reply = groqData.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+        return res.json({ reply });
+      }
+
+      // No teacher matched — general query, call Groq with general context
+      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llama3-8b-8192",
+          messages: [
+            {
+              role: "system",
+              content: `You are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. You help students with questions about the platform. Available faculty count: ${teachers.length}. You can help users search for faculty by name, ask about reviews, PYQs, and how the platform works. If a user asks about a specific faculty, tell them to mention the faculty name so you can look them up. Keep tone friendly and concise.`
+            },
+            { role: "user", content: message }
+          ],
+          temperature: 0.7,
+          max_tokens: 400,
+        }),
+      });
+
+      if (!groqResponse.ok) {
+        return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+      }
+
+      const groqData = await groqResponse.json();
+      const reply = groqData.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+      return res.json({ reply });
+
+    } catch (err) {
+      console.error("AI Chat Error:", err);
+      return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+    }
+  });
+
   return httpServer;
 }
