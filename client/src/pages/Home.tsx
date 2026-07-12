@@ -311,9 +311,10 @@ function LeaderboardSection() {
       {/* Main container card */}
       <div style={{
         borderRadius: "20px",
-        border: "1px solid hsl(var(--border))",
-        background: "hsl(var(--card))",
+        border: "1px solid hsl(var(--border) / 0.6)",
+        background: "hsl(var(--background))",
         overflow: "hidden",
+        boxShadow: "0 2px 12px hsl(var(--foreground) / 0.04)",
       }}>
         {/* Top 3 Podium */}
         <div style={{ padding: "36px 20px 28px" }}>
@@ -349,8 +350,8 @@ function LeaderboardSection() {
                 >
                   <span style={{
                     width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "hsl(var(--primary) / 0.15)", border: "1px solid hsl(var(--primary) / 0.3)",
-                    fontFamily: "var(--font-display)", fontSize: "0.65rem", fontWeight: 700, color: "hsl(var(--primary))", flexShrink: 0,
+                    background: "transparent", border: "1px solid hsl(var(--border))",
+                    fontFamily: "var(--font-display)", fontSize: "0.65rem", fontWeight: 700, color: "hsl(var(--muted-foreground))", flexShrink: 0,
                   }}>{i + 4}</span>
                   {entry.photoUrl ? (
                     <img src={entry.photoUrl} alt="" style={{ width: "34px", height: "34px", borderRadius: "50%", objectFit: "cover", border: "2px solid hsl(var(--border))", flexShrink: 0 }} />
@@ -399,10 +400,11 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
     <div style={{
       borderRadius: "16px",
       border: "1px solid hsl(var(--border))",
-      background: "hsl(var(--secondary))",
+      background: "hsl(var(--card))",
       padding: "32px 16px 24px",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
       position: "relative",
+      boxShadow: "0 2px 8px hsl(var(--foreground) / 0.03)",
     }}>
       {/* Badge */}
       <div style={{
@@ -423,7 +425,7 @@ function PodiumCardLB({ entry, rank }: { entry: LeaderboardEntry; rank: number }
       ) : (
         <div style={{
           width: avatarSize, height: avatarSize, borderRadius: "50%", border: `4px solid ${ringColor}`,
-          display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--muted))",
+          display: "flex", alignItems: "center", justifyContent: "center", background: "hsl(var(--card))",
           marginTop: "12px", marginBottom: "12px",
         }}>
           <GraduationCap style={{ width: isFirst ? "36px" : "28px", height: isFirst ? "36px" : "28px", color: "hsl(var(--muted-foreground))" }} />
