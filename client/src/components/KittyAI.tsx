@@ -110,10 +110,8 @@ export function KittyAI() {
   };
 
   const quickQuestions = [
-    "Who is friendly in CSE?",
-    "Which faculty has open minded marking?",
-    "Who teaches Discrete Mathematics?",
-    "Which faculty is best for weak students?",
+    "Help me find a faculty \ud83c\udf93",
+    "Help me find a PYQ \ud83d\udcc4",
   ];
 
   const hasMessages = messages.length > 0;
@@ -284,7 +282,7 @@ export function KittyAI() {
 
               {/* Quick question chips */}
               {!hasMessages && !isLoading && (
-                <div className="kitty-chips" style={{ padding: "0 16px 10px", overflowX: "auto", display: "flex", gap: "6px", scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
+                <div style={{ padding: "8px 16px", display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
                   {quickQuestions.map((q, i) => (
                     <button key={i} onClick={() => sendMessage(q)} style={{
                       fontFamily: "var(--font-sans)", fontSize: "0.78rem", padding: "6px 14px",
@@ -292,7 +290,7 @@ export function KittyAI() {
                       background: "hsl(var(--secondary))", color: "hsl(var(--foreground))",
                       cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, display: "flex", alignItems: "center", gap: "4px",
                     }}>
-                      {"\u26A1"} {q}
+                      {q}
                     </button>
                   ))}
                 </div>
