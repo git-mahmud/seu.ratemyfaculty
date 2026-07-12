@@ -15,6 +15,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 import Leaderboard from "@/pages/Leaderboard";
 import NotFound from "@/pages/not-found";
+import { KittyAI } from "@/components/KittyAI";
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -50,6 +51,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <KittyAI />
       </TooltipProvider>
     </QueryClientProvider>
   );
