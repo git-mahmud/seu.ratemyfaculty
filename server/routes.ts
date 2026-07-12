@@ -498,7 +498,7 @@ export async function registerRoutes(
 
       // Step 3.5: Course-based faculty search (if no name/initial matched)
       if (!resolvedTeacher) {
-        const courseStopWords = ["suggest", "best", "faculty", "for", "me", "find", "who", "teaches", "teach", "taking", "which", "is", "good", "recommend", "want", "help", "the", "and", "tell", "about", "how"];
+        const courseStopWords = ["suggest", "best", "faculty", "for", "me", "find", "who", "teaches", "teach", "taking", "which", "is", "good", "recommend", "want", "help", "the", "and", "tell", "about", "how", "are", "you", "your", "what", "can", "do", "does", "did", "will", "would", "should", "could", "have", "has", "been", "being", "was", "were", "not", "but", "from", "this", "that", "with", "they", "their", "there", "here", "just", "also", "very", "really", "please", "thanks", "thank", "hello", "hey", "hi"];
         const courseQueryWords = message.toLowerCase()
           .replace(/[^a-z0-9\s]/g, "")
           .split(/\s+/)
