@@ -60,10 +60,10 @@ export function KittyAI() {
   };
 
   const quickQuestions = [
-    "Who is strict in CSE?",
-    "Best for beginners?",
-    "How is FBH?",
-    "Find PYQs for CSE181",
+    "Who is friendly in CSE?",
+    "Which faculty has open minded marking?",
+    "Who teaches Discrete Mathematics?",
+    "Which faculty is best for weak students?",
   ];
 
   const hasMessages = messages.length > 0;
@@ -234,7 +234,7 @@ export function KittyAI() {
 
               {/* Quick question chips */}
               {!hasMessages && !isLoading && (
-                <div style={{ padding: "0 16px 10px", overflowX: "auto", display: "flex", gap: "6px", scrollbarWidth: "none" }}>
+                <div className="kitty-chips" style={{ padding: "0 16px 10px", overflowX: "auto", display: "flex", gap: "6px", scrollbarWidth: "none", msOverflowStyle: "none" } as any}>
                   {quickQuestions.map((q, i) => (
                     <button key={i} onClick={() => sendMessage(q)} style={{
                       fontFamily: "var(--font-sans)", fontSize: "0.78rem", padding: "6px 14px",
@@ -282,6 +282,7 @@ export function KittyAI() {
         @keyframes kittyBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
         @keyframes kittySlideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         @keyframes kittyDot { 0%,100%{opacity:0.3;transform:translateY(0)} 50%{opacity:1;transform:translateY(-3px)} }
+        .kitty-chips::-webkit-scrollbar { display: none; }
       `}</style>
     </>
   );

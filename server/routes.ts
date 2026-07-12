@@ -342,66 +342,52 @@ export async function registerRoutes(
       const query = message.toLowerCase();
       let resolvedTeacher: any = null;
 
-      // Step 1: Initial matching [XYZ] takes priority
-      const userInitialsMatch = message.match(/\[([A-Za-z]+)\]/);
-      if (userInitialsMatch) {
-        const initials = userInitialsMatch[1].toUpperCase();
-        resolvedTeacher = teachers.find(t => {
-          const m = t.fullName.match(/\[([A-Z]+)\]/i);
-          return m && m[1].toUpperCase() === initials;
-        }) || null;
-      }
+      // Step 1: Build initial map from all teachers
+      const initialMap: Record<string, any> = {};
+      teachers.forEach(t => {
+        const match = t.fullName.match(/\[([A-Z]+)\]/i);
+        if (match) initialMap[match[1].toUpperCase()] = t;
+      });
 
-      // Step 2: Check bare initials (2-6 uppercase letters as standalone word)
-      if (!resolvedTeacher) {
-        const words = message.split(/\s+/);
-        for (const word of words) {
-          if (/^[A-Z]{2,6}$/.test(word)) {
-            const found = teachers.find(t => {
-              const m = t.fullName.match(/\[([A-Z]+)\]/i);
-              return m && m[1].toUpperCase() === word.toUpperCase();
-            });
-            if (found) { resolvedTeacher = found; break; }
-          }
+      // Step 2: Check if user message contains any initial (case insensitive)
+      const msgWords = message.toUpperCase().split(/[\s\[\].,!?]+/).filter(Boolean);
+      for (const word of msgWords) {
+        if (initialMap[word]) {
+          resolvedTeacher = initialMap[word];
+          break;
         }
       }
 
-      // Step 3: Fuzzy name matching with scoring
+      // Step 3: Smarter name matching with scoring
       if (!resolvedTeacher) {
-        const stopWords = ["md", "dr", "bin", "binte", "binti", "al", "the", "about", "tell", "me", "how", "is", "what", "who", "for", "and", "sir", "mam", "madam", "professor", "prof", "can", "you", "know", "think", "like"];
-        const queryWords = query.split(/\s+/).filter(w => w.length >= 3 && !stopWords.includes(w));
+        const skipWords = ["md", "dr", "bin", "binte", "al", "is", "how", "for", "who", "about", "tell", "me", "the", "a", "an", "and", "of", "in", "strict", "friendly", "best", "worst", "what", "good", "bad", "sir", "mam", "madam", "professor", "prof", "can", "you", "know", "think", "like"];
+        const msgLower = message.toLowerCase();
 
-        if (queryWords.length > 0) {
-          const scored = teachers.map(t => {
-            const name = t.fullName.toLowerCase().replace(/\[[^\]]*\]/, "").trim();
-            let score = 0;
-            const fullQuery = queryWords.join(" ");
-            if (fullQuery.length >= 3 && name.includes(fullQuery)) {
-              score = fullQuery.length * 3;
-            } else {
-              for (const word of queryWords) {
-                if (name.includes(word)) score += word.length;
-              }
-            }
-            return { teacher: t, score };
-          }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+        const scores = teachers.map(t => {
+          const nameParts = t.fullName.toLowerCase()
+            .replace(/\[.*?\]/g, "")
+            .split(/\s+/)
+            .filter((w: string) => w.length > 2 && !skipWords.includes(w));
 
-          if (scored.length === 1) {
-            resolvedTeacher = scored[0].teacher;
-          } else if (scored.length >= 2) {
-            if (scored[0].score > scored[1].score * 1.5) {
-              resolvedTeacher = scored[0].teacher;
-            } else {
-              const ambiguous = scored.filter(s => s.score >= scored[0].score * 0.7).slice(0, 5);
-              const options = ambiguous.map(s => {
-                const bm = s.teacher.fullName.match(/\[([A-Z]+)\]/i);
-                return `${bm ? `[${bm[1]}]` : ""} ${s.teacher.fullName}`;
-              }).join("\n");
-              return res.json({
-                reply: `I found multiple faculty members matching that name. Could you specify which one?\n\n${options}\n\nTip: Use their initials in brackets like [FBH] to be specific!`
-              });
-            }
-          }
+          let score = 0;
+          nameParts.forEach((part: string) => {
+            if (msgLower.includes(part)) score += part.length;
+          });
+          return { teacher: t, score };
+        }).filter(x => x.score > 3).sort((a, b) => b.score - a.score);
+
+        if (scores.length === 1) {
+          resolvedTeacher = scores[0].teacher;
+        } else if (scores.length >= 2 && scores[0].score - scores[1].score >= 3) {
+          resolvedTeacher = scores[0].teacher;
+        } else if (scores.length >= 2 && scores[0].score - scores[1].score < 3) {
+          const options = scores.slice(0, 4).map(s => {
+            const initMatch = s.teacher.fullName.match(/\[([A-Z]+)\]/i);
+            return initMatch ? `[${initMatch[1]}] ${s.teacher.fullName.replace(/\[.*?\]/g, "").trim()}` : s.teacher.fullName;
+          }).join("\n");
+          return res.json({
+            reply: `I found a few faculty members that could match. Which one did you mean?\n\n${options}\n\nYou can reply with their initials like "FBH"`
+          });
         }
       }
 
