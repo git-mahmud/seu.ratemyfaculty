@@ -321,17 +321,28 @@ export async function registerRoutes(
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, customApiKey } = req.body;
       if (!message || typeof message !== "string") {
         return res.status(400).json({ reply: "Please provide a message." });
       }
 
-      const teachers = await storage.getTeachers();
-      const query = message.toLowerCase();
-      let resolvedTeacher = null;
+      const apiKey = customApiKey || process.env.GROQ_API_KEY;
+      if (!apiKey) {
+        console.error("AI Chat: No GROQ_API_KEY available");
+        return res.json({ reply: "AI is not configured yet. Please add your Groq API key in settings." });
+      }
 
-      // Fix 1 — Initial matching takes priority
-      // Check if user's message contains any [XYZ] pattern or bare initials matching faculty
+      let teachers: any[] = [];
+      try {
+        teachers = await storage.getTeachers();
+      } catch (e) {
+        console.error("AI Chat: Failed to fetch teachers", e);
+      }
+
+      const query = message.toLowerCase();
+      let resolvedTeacher: any = null;
+
+      // Step 1: Initial matching [XYZ] takes priority
       const userInitialsMatch = message.match(/\[([A-Za-z]+)\]/);
       if (userInitialsMatch) {
         const initials = userInitialsMatch[1].toUpperCase();
@@ -341,11 +352,11 @@ export async function registerRoutes(
         }) || null;
       }
 
-      // Also check if user typed bare initials that match a faculty's bracket initials
+      // Step 2: Check bare initials (2-6 uppercase letters as standalone word)
       if (!resolvedTeacher) {
         const words = message.split(/\s+/);
         for (const word of words) {
-          if (/^[A-Z]{2,6}$/i.test(word) && word.length >= 2) {
+          if (/^[A-Z]{2,6}$/.test(word)) {
             const found = teachers.find(t => {
               const m = t.fullName.match(/\[([A-Z]+)\]/i);
               return m && m[1].toUpperCase() === word.toUpperCase();
@@ -355,157 +366,130 @@ export async function registerRoutes(
         }
       }
 
-      // Fix 2 & 3 — Smarter name matching with scoring
+      // Step 3: Fuzzy name matching with scoring
       if (!resolvedTeacher) {
-        const stopWords = ["md", "dr", "bin", "binti", "al", "the", "about", "tell", "me", "how", "is", "what", "who", "for", "and", "sir", "mam", "madam", "professor", "prof"];
+        const stopWords = ["md", "dr", "bin", "binte", "binti", "al", "the", "about", "tell", "me", "how", "is", "what", "who", "for", "and", "sir", "mam", "madam", "professor", "prof", "can", "you", "know", "think", "like"];
         const queryWords = query.split(/\s+/).filter(w => w.length >= 3 && !stopWords.includes(w));
 
         if (queryWords.length > 0) {
           const scored = teachers.map(t => {
             const name = t.fullName.toLowerCase().replace(/\[[^\]]*\]/, "").trim();
             let score = 0;
-
-            // Check full query substring match
             const fullQuery = queryWords.join(" ");
-            if (name.includes(fullQuery) && fullQuery.length >= 3) {
+            if (fullQuery.length >= 3 && name.includes(fullQuery)) {
               score = fullQuery.length * 3;
             } else {
-              // Score individual words
               for (const word of queryWords) {
-                if (name.includes(word)) {
-                  score += word.length;
-                }
+                if (name.includes(word)) score += word.length;
               }
             }
-
             return { teacher: t, score };
           }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
 
           if (scored.length === 1) {
             resolvedTeacher = scored[0].teacher;
           } else if (scored.length >= 2) {
-            const topScore = scored[0].score;
-            const secondScore = scored[1].score;
-            // If top match is clearly better (50%+ more), pick it directly
-            if (topScore > secondScore * 1.5) {
+            if (scored[0].score > scored[1].score * 1.5) {
               resolvedTeacher = scored[0].teacher;
             } else {
-              // Ambiguity — show top matches with similar scores
-              const ambiguous = scored.filter(s => s.score >= topScore * 0.7).slice(0, 5);
+              const ambiguous = scored.filter(s => s.score >= scored[0].score * 0.7).slice(0, 5);
               const options = ambiguous.map(s => {
-                const bracketMatch = s.teacher.fullName.match(/\[([A-Z]+)\]/i);
-                const initials = bracketMatch ? `[${bracketMatch[1]}]` : "";
-                return `${initials} ${s.teacher.fullName}`;
+                const bm = s.teacher.fullName.match(/\[([A-Z]+)\]/i);
+                return `${bm ? `[${bm[1]}]` : ""} ${s.teacher.fullName}`;
               }).join("\n");
               return res.json({
-                reply: `I found multiple faculty members matching that name. Could you specify which one?\n\n${options}\n\nYou can use their initials in brackets to be specific!`
+                reply: `I found multiple faculty members matching that name. Could you specify which one?\n\n${options}\n\nTip: Use their initials in brackets like [FBH] to be specific!`
               });
             }
           }
         }
       }
 
-      // If we have a resolved teacher, fetch their data
+      // Step 4: If teacher found, fetch their data
       if (resolvedTeacher) {
-        const teacherReviews = await storage.getReviewsByTeacherId(resolvedTeacher.id);
-        const teacherPyqs = await storage.getPyqsByTeacherId(resolvedTeacher.id);
+        let teacherReviews: any[] = [];
+        let teacherPyqs: any[] = [];
+        try {
+          teacherReviews = await storage.getReviewsByTeacherId(resolvedTeacher.id);
+          teacherPyqs = await storage.getPyqsByTeacherId(resolvedTeacher.id);
+        } catch (e) {
+          console.error("AI Chat: Failed to fetch teacher data", e);
+        }
 
-        // Minimum review check
         if (teacherReviews.length < 5) {
           return res.json({
-            reply: `I don't have enough data about ${resolvedTeacher.fullName} yet. We need at least 5 reviews to give you an accurate summary. Currently there are only ${teacherReviews.length} review(s). Be the first to contribute!`
+            reply: `I don't have enough data about ${resolvedTeacher.fullName} yet. We need at least 5 reviews for an accurate summary. Currently there are only ${teacherReviews.length} review(s). Be the first to review!`
           });
         }
 
-        // Build context for Groq
-        const reviewsContext = teacherReviews.map((r, i) =>
-          `Review ${i + 1}: Personality: ${r.personality}, Marking: ${r.markingStyle}, Difficulty: ${r.questionDifficulty}, Best For: ${(r as any).bestFor}, Course: ${r.courseTaken}${r.comment ? `, Comment: "${r.comment}"` : ""}`
+        const reviewsContext = teacherReviews.map((r: any, i: number) =>
+          `Review ${i + 1}: Personality: ${r.personality}, Marking: ${r.markingStyle}, Difficulty: ${r.questionDifficulty}, Best For: ${r.bestFor || "N/A"}, Course: ${r.courseTaken}${r.comment ? `, Comment: "${r.comment}"` : ""}`
         ).join("\n");
 
         const pyqContext = teacherPyqs.length > 0
-          ? "\nAvailable PYQs:\n" + teacherPyqs.map(p =>
-            `- ${p.courseCode} ${p.examType} ${p.year} (${p.semester}): ${p.fileUrl}`
-          ).join("\n")
+          ? "\nAvailable PYQs:\n" + teacherPyqs.map((p: any) => `- ${p.courseCode} ${p.examType} ${p.year} (${p.semester}): ${p.fileUrl}`).join("\n")
           : "\nNo PYQs available for this faculty.";
 
         const context = `Faculty: ${resolvedTeacher.fullName}\nDepartment: ${resolvedTeacher.department}\nUniversity: ${resolvedTeacher.university}\nCourses: ${resolvedTeacher.coursesTaught.join(", ")}\nTotal Reviews: ${teacherReviews.length}\n\n${reviewsContext}\n${pyqContext}`;
 
-        // Call Groq
-        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        try {
+          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "llama3-8b-8192",
+              messages: [
+                { role: "system", content: `You are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty. You help students understand faculty based on real reviews.\n\nRules:\n- Mention overall personality based on review majority\n- Summarize marking style honestly\n- Mention exam difficulty\n- Say who they're best for\n- Quote 1-2 student comments if relevant\n- Share PYQ links if available\n- Be friendly, concise, honest\n- Never make up info` },
+                { role: "user", content: `User asked: "${message}"\n\nDatabase data:\n${context}` }
+              ],
+              temperature: 0.7,
+              max_tokens: 800,
+            }),
+          });
+          console.log("AI Chat Groq response status:", groqRes.status);
+          if (!groqRes.ok) {
+            const errBody = await groqRes.text();
+            console.error("AI Chat Groq error:", errBody);
+            return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+          }
+          const groqData = await groqRes.json();
+          return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a response." });
+        } catch (e) {
+          console.error("AI Chat Groq fetch failed:", e);
+          return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+        }
+      }
+
+      // Step 5: No teacher matched — general query
+      try {
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-            "Content-Type": "application/json",
-          },
+          headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "llama3-8b-8192",
             messages: [
-              {
-                role: "system",
-                content: `You are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. You help students understand faculty based on real student reviews.
-
-When summarizing a faculty:
-- Mention their overall personality (friendly/strict/neutral) based on majority of reviews
-- Summarize their marking style honestly
-- Mention exam difficulty level
-- Say who they are best suited for (strong/average/weak students)
-- Quote 1-2 interesting student comments if relevant
-- If PYQ links are available, share them clearly
-- Keep tone friendly, honest, and helpful
-- Be concise — don't write essays
-- Never make up information. Only use the data provided to you.
-- If data is insufficient, say so honestly`
-              },
-              {
-                role: "user",
-                content: `User asked: "${message}"\n\nHere is the real data from our database:\n\n${context}`
-              }
+              { role: "system", content: `You are Kitty, a cute AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. Faculty count: ${teachers.length}. Help users search faculty by name, ask about reviews/PYQs, and how the platform works. If they ask about a specific faculty, tell them to mention the name. Be friendly and concise.` },
+              { role: "user", content: message }
             ],
             temperature: 0.7,
-            max_tokens: 800,
+            max_tokens: 400,
           }),
         });
-
-        if (!groqResponse.ok) {
+        console.log("AI Chat general Groq status:", groqRes.status);
+        if (!groqRes.ok) {
+          const errBody = await groqRes.text();
+          console.error("AI Chat general Groq error:", errBody);
           return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
         }
-
-        const groqData = await groqResponse.json();
-        const reply = groqData.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
-        return res.json({ reply });
-      }
-
-      // No teacher matched — general query, call Groq with general context
-      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "llama3-8b-8192",
-          messages: [
-            {
-              role: "system",
-              content: `You are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. You help students with questions about the platform. Available faculty count: ${teachers.length}. You can help users search for faculty by name, ask about reviews, PYQs, and how the platform works. If a user asks about a specific faculty, tell them to mention the faculty name so you can look them up. Keep tone friendly and concise.`
-            },
-            { role: "user", content: message }
-          ],
-          temperature: 0.7,
-          max_tokens: 400,
-        }),
-      });
-
-      if (!groqResponse.ok) {
+        const groqData = await groqRes.json();
+        return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a response." });
+      } catch (e) {
+        console.error("AI Chat general fetch failed:", e);
         return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
       }
 
-      const groqData = await groqResponse.json();
-      const reply = groqData.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
-      return res.json({ reply });
-
     } catch (err) {
-      console.error("AI Chat Error:", err);
+      console.error("AI Chat top-level error:", err);
       return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
     }
   });
