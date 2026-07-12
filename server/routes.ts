@@ -460,7 +460,115 @@ export async function registerRoutes(
         }
       }
 
-      // Step 5: No teacher matched — general query
+      // Step 5: No teacher matched — check for recommendation/general queries
+      // Detect recommendation criteria
+      const personalityKeywords = { "friendly": "Friendly", "chill": "Friendly", "easy going": "Friendly", "approachable": "Friendly", "strict": "Strict", "neutral": "Neutral" };
+      const markingKeywords = { "open minded": "Open-minded", "lenient": "Open-minded", "easy marking": "Open-minded", "strict marking": "Strict", "fair": "Average" };
+      const difficultyKeywords = { "easy exam": "Easy", "easy questions": "Easy", "hard exam": "Hard", "tough": "Hard" };
+      const bestForKeywords = { "weak student": "Weak Students", "beginners": "Weak Students", "struggling": "Weak Students", "average student": "Average Students", "strong student": "Strong Students" };
+
+      let detectedPersonality: string | null = null;
+      let detectedMarking: string | null = null;
+      let detectedDifficulty: string | null = null;
+      let detectedBestFor: string | null = null;
+      let detectedCourse: string | null = null;
+      let isGeneralListQuery = false;
+      let generalListType: string | null = null;
+
+      for (const [kw, val] of Object.entries(personalityKeywords)) { if (query.includes(kw)) { detectedPersonality = val; break; } }
+      for (const [kw, val] of Object.entries(markingKeywords)) { if (query.includes(kw)) { detectedMarking = val; break; } }
+      for (const [kw, val] of Object.entries(difficultyKeywords)) { if (query.includes(kw)) { detectedDifficulty = val; break; } }
+      for (const [kw, val] of Object.entries(bestForKeywords)) { if (query.includes(kw)) { detectedBestFor = val; break; } }
+
+      // Detect course codes (CSE181, MAT110, etc.)
+      const courseMatch = message.match(/[A-Z]{2,4}\d{3}/i);
+      if (courseMatch) detectedCourse = courseMatch[0].toUpperCase();
+      // Detect subject names
+      const subjectMap: Record<string, string> = { "discrete math": "CSE181", "calculus": "MAT", "english": "ENG", "physics": "PHY", "data structure": "CSE", "programming": "CSE" };
+      for (const [subj, code] of Object.entries(subjectMap)) { if (query.includes(subj)) { detectedCourse = code; break; } }
+
+      // Detect general list queries
+      if (query.includes("most reviews") || query.includes("most popular")) { isGeneralListQuery = true; generalListType = "most_reviews"; }
+      else if (query.includes("best faculty") || query.includes("best teacher")) { isGeneralListQuery = true; generalListType = "best_overall"; }
+      else if (query.includes("who teaches") || query.includes("which faculty teaches")) { isGeneralListQuery = true; generalListType = "teaches_course"; }
+      else if (query.includes("list all") || query.includes("faculty in")) { isGeneralListQuery = true; generalListType = "department"; }
+
+      const hasCriteria = detectedPersonality || detectedMarking || detectedDifficulty || detectedBestFor || detectedCourse || isGeneralListQuery;
+
+      if (hasCriteria) {
+        try {
+          // Fetch reviews for all teachers with 5+ reviews
+          const teachersWithData: { teacher: any; reviews: any[]; score: number }[] = [];
+          for (const t of teachers) {
+            if (t.reviewCount < 5) continue;
+            if (detectedCourse && !t.coursesTaught.some((c: string) => c.toUpperCase().includes(detectedCourse!))) continue;
+
+            const revs = await storage.getReviewsByTeacherId(t.id);
+            let score = 0;
+
+            if (detectedPersonality) score += revs.filter((r: any) => r.personality === detectedPersonality).length;
+            if (detectedMarking) score += revs.filter((r: any) => r.markingStyle === detectedMarking).length;
+            if (detectedDifficulty) score += revs.filter((r: any) => r.questionDifficulty === detectedDifficulty).length;
+            if (detectedBestFor) score += revs.filter((r: any) => r.bestFor === detectedBestFor).length;
+            if (isGeneralListQuery && generalListType === "most_reviews") score = revs.length;
+            if (isGeneralListQuery && generalListType === "best_overall") score = revs.filter((r: any) => r.personality === "Friendly" || r.markingStyle === "Open-minded").length;
+            if (!detectedPersonality && !detectedMarking && !detectedDifficulty && !detectedBestFor && !isGeneralListQuery) score = revs.length;
+
+            teachersWithData.push({ teacher: t, reviews: revs, score });
+          }
+
+          teachersWithData.sort((a, b) => b.score - a.score);
+          const top3 = teachersWithData.slice(0, 3);
+
+          if (top3.length === 0) {
+            return res.json({ reply: "I couldn't find any faculty matching that criteria with enough reviews. Try asking differently or check back later!" });
+          }
+
+          const recContext = top3.map((td, i) => {
+            const r = td.reviews;
+            const personalities = r.map((rv: any) => rv.personality);
+            const topPersonality = ["Friendly", "Strict", "Neutral"].sort((a, b) => personalities.filter((p: string) => p === b).length - personalities.filter((p: string) => p === a).length)[0];
+            const comments = r.filter((rv: any) => rv.comment).slice(0, 2).map((rv: any) => `"${rv.comment}"`).join(", ");
+            return `${i + 1}. ${td.teacher.fullName} (${td.teacher.department}) - ${td.reviews.length} reviews, mostly ${topPersonality}, score: ${td.score}. Comments: ${comments || "No comments"}`;
+          }).join("\n");
+
+          const criteriaDesc = [
+            detectedPersonality && `personality: ${detectedPersonality}`,
+            detectedMarking && `marking: ${detectedMarking}`,
+            detectedDifficulty && `difficulty: ${detectedDifficulty}`,
+            detectedBestFor && `best for: ${detectedBestFor}`,
+            detectedCourse && `course: ${detectedCourse}`,
+            generalListType,
+          ].filter(Boolean).join(", ");
+
+          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "llama-3.1-8b-instant",
+              messages: [
+                { role: "system", content: `You are Kitty, a cute AI assistant for SEU Rate My Faculty. When recommending faculty, present them as a ranked list. For each faculty mention their name, why they match the criteria, and one standout student comment. Be conversational and helpful like a senior student giving advice. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Keep responses under 200 words.` },
+                { role: "user", content: `User asked: "${message}"\nCriteria detected: ${criteriaDesc}\n\nTop matching faculty from database:\n${recContext}` }
+              ],
+              temperature: 0.7,
+              max_tokens: 600,
+            }),
+          });
+          console.log("AI Chat recommendation Groq status:", groqRes.status);
+          if (!groqRes.ok) {
+            const errBody = await groqRes.text();
+            console.error("AI Chat recommendation Groq error:", errBody);
+            return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+          }
+          const groqData = await groqRes.json();
+          return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a recommendation." });
+        } catch (e) {
+          console.error("AI Chat recommendation error:", e);
+          return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
+        }
+      }
+
+      // Step 6: Truly general query — no criteria, no teacher name
       try {
         const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
