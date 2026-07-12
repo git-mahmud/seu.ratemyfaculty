@@ -326,6 +326,18 @@ export async function registerRoutes(
         return res.status(400).json({ reply: "Please provide a message." });
       }
 
+      // Quick keyword responses (no API call needed)
+      const whoAreYouKeywords = ["who are you", "what are you", "your name", "introduce yourself", "tell me about yourself", "what is your name"];
+      const whoMadeYouKeywords = ["who made you", "who built you", "who created you", "your creator", "your developer", "who developed you"];
+      const msgLower = message.toLowerCase().trim();
+
+      if (whoAreYouKeywords.some(k => msgLower.includes(k))) {
+        return res.json({ reply: "I'm Kitty \ud83d\udc31 your AI assistant for SEU Rate My Faculty! I'm here to help you find information about faculty reviews, marking styles, exam difficulty, and previous year questions. Just ask me anything!" });
+      }
+      if (whoMadeYouKeywords.some(k => msgLower.includes(k))) {
+        return res.json({ reply: "I was built by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He created SEU Rate My Faculty to help students make better academic decisions! \ud83d\udc31" });
+      }
+
       const apiKey = customApiKey || process.env.GROQ_API_KEY;
       if (!apiKey) {
         console.error("AI Chat: No GROQ_API_KEY available");
