@@ -328,35 +328,81 @@ export async function registerRoutes(
 
       const teachers = await storage.getTeachers();
       const query = message.toLowerCase();
-
-      // Find matching teachers by name (case-insensitive partial match)
-      const matchedTeachers = teachers.filter(t =>
-        t.fullName.toLowerCase().includes(query.split(" ").filter(w => w.length > 2).join(" ")) ||
-        query.split(" ").filter(w => w.length > 2).some(word => t.fullName.toLowerCase().includes(word))
-      );
-
-      // Also check for initials in brackets like [MBH]
-      const initialsMatch = message.match(/\[([A-Z]+)\]/);
       let resolvedTeacher = null;
 
-      if (initialsMatch) {
-        const initials = initialsMatch[1];
-        resolvedTeacher = teachers.find(t => t.fullName.includes(`[${initials}]`)) || null;
+      // Fix 1 — Initial matching takes priority
+      // Check if user's message contains any [XYZ] pattern or bare initials matching faculty
+      const userInitialsMatch = message.match(/\[([A-Za-z]+)\]/);
+      if (userInitialsMatch) {
+        const initials = userInitialsMatch[1].toUpperCase();
+        resolvedTeacher = teachers.find(t => {
+          const m = t.fullName.match(/\[([A-Z]+)\]/i);
+          return m && m[1].toUpperCase() === initials;
+        }) || null;
       }
 
-      // If no initials provided, check matched teachers
-      if (!resolvedTeacher && matchedTeachers.length === 1) {
-        resolvedTeacher = matchedTeachers[0];
-      } else if (!resolvedTeacher && matchedTeachers.length > 1) {
-        // Ambiguity — ask for clarification
-        const options = matchedTeachers.map(t => {
-          const bracketMatch = t.fullName.match(/\[([A-Z]+)\]/);
-          const initials = bracketMatch ? `[${bracketMatch[1]}]` : "";
-          return `${initials} ${t.fullName}`;
-        }).join(" or ");
-        return res.json({
-          reply: `I found multiple faculty members matching that name. Could you specify which one?\n\n${options}\n\nYou can use their initials in brackets to be specific!`
-        });
+      // Also check if user typed bare initials that match a faculty's bracket initials
+      if (!resolvedTeacher) {
+        const words = message.split(/\s+/);
+        for (const word of words) {
+          if (/^[A-Z]{2,6}$/i.test(word) && word.length >= 2) {
+            const found = teachers.find(t => {
+              const m = t.fullName.match(/\[([A-Z]+)\]/i);
+              return m && m[1].toUpperCase() === word.toUpperCase();
+            });
+            if (found) { resolvedTeacher = found; break; }
+          }
+        }
+      }
+
+      // Fix 2 & 3 — Smarter name matching with scoring
+      if (!resolvedTeacher) {
+        const stopWords = ["md", "dr", "bin", "binti", "al", "the", "about", "tell", "me", "how", "is", "what", "who", "for", "and", "sir", "mam", "madam", "professor", "prof"];
+        const queryWords = query.split(/\s+/).filter(w => w.length >= 3 && !stopWords.includes(w));
+
+        if (queryWords.length > 0) {
+          const scored = teachers.map(t => {
+            const name = t.fullName.toLowerCase().replace(/\[[^\]]*\]/, "").trim();
+            let score = 0;
+
+            // Check full query substring match
+            const fullQuery = queryWords.join(" ");
+            if (name.includes(fullQuery) && fullQuery.length >= 3) {
+              score = fullQuery.length * 3;
+            } else {
+              // Score individual words
+              for (const word of queryWords) {
+                if (name.includes(word)) {
+                  score += word.length;
+                }
+              }
+            }
+
+            return { teacher: t, score };
+          }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+
+          if (scored.length === 1) {
+            resolvedTeacher = scored[0].teacher;
+          } else if (scored.length >= 2) {
+            const topScore = scored[0].score;
+            const secondScore = scored[1].score;
+            // If top match is clearly better (50%+ more), pick it directly
+            if (topScore > secondScore * 1.5) {
+              resolvedTeacher = scored[0].teacher;
+            } else {
+              // Ambiguity — show top matches with similar scores
+              const ambiguous = scored.filter(s => s.score >= topScore * 0.7).slice(0, 5);
+              const options = ambiguous.map(s => {
+                const bracketMatch = s.teacher.fullName.match(/\[([A-Z]+)\]/i);
+                const initials = bracketMatch ? `[${bracketMatch[1]}]` : "";
+                return `${initials} ${s.teacher.fullName}`;
+              }).join("\n");
+              return res.json({
+                reply: `I found multiple faculty members matching that name. Could you specify which one?\n\n${options}\n\nYou can use their initials in brackets to be specific!`
+              });
+            }
+          }
+        }
       }
 
       // If we have a resolved teacher, fetch their data
