@@ -326,15 +326,16 @@ export async function registerRoutes(
         return res.status(400).json({ reply: "Please provide a message." });
       }
 
-      // Smart identity detection (regex-based)
-      const msgLower = message.toLowerCase().trim();
+      // Smart identity detection (regex-based) — creator check FIRST
+      const creatorQuestions = /\b(who|by whom).{0,30}(made|built|created|developed|design|code|program|develop).{0,20}(you|kitty|this|app|platform|website)\b/i;
+      const selfQuestions = /\b(who|what).{0,10}(are you|is kitty|is this|your name|yourself)\b/i;
 
-      if (/\b(who|what).{0,20}(you|your name|yourself)\b/i.test(message) && !/\b(faculty|teacher|professor|course|subject|pyq|review|marking|exam)\b/i.test(message)) {
-        return res.json({ reply: "I'm Kitty \ud83d\udc31 your AI assistant for SEU Rate My Faculty! I'm here to help SEU students find faculty reviews, marking styles, exam difficulty and previous year questions. Just ask me about any faculty!" });
+      if (creatorQuestions.test(message)) {
+        return res.json({ reply: "I was created by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He built SEU Rate My Faculty to help students make smarter academic decisions! \ud83d\udc31" });
       }
 
-      if (/\b(who|by whom).{0,20}(made|built|created|developed|designed|coded|programmed).{0,10}(you|this|kitty)\b/i.test(message)) {
-        return res.json({ reply: "I was created by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He built SEU Rate My Faculty to help students make smarter academic decisions! \ud83d\udc31" });
+      if (selfQuestions.test(message) && !/\b(faculty|teacher|professor|course|subject|pyq|review|marking|exam)\b/i.test(message)) {
+        return res.json({ reply: "I'm Kitty \ud83d\udc31 your AI assistant for SEU Rate My Faculty! I'm here to help SEU students find faculty reviews, marking styles, exam difficulty and previous year questions. Just ask me about any faculty!" });
       }
 
       const apiKey = customApiKey || process.env.GROQ_API_KEY;
