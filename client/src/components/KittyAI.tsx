@@ -71,7 +71,14 @@ export function KittyAI() {
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: "kitty", content: data.reply || "Hmm, I got nothing. Try again?" }]);
+      const rawReply = data.reply || "Hmm, I got nothing. Try again?";
+      const cleanReply = rawReply
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/#{1,6} /g, '')
+        .replace(/\* /g, '\u2022 ')
+        .trim();
+      setMessages(prev => [...prev, { role: "kitty", content: cleanReply }]);
     } catch {
       setMessages(prev => [...prev, { role: "kitty", content: "Oops! I'm having a moment. Try again?" }]);
     } finally {
@@ -137,8 +144,8 @@ export function KittyAI() {
       {isOpen && (
         <div style={{
           position: "fixed", bottom: "92px", right: "24px",
-          width: "340px", maxWidth: "calc(100vw - 32px)",
-          height: "500px", maxHeight: "calc(100vh - 120px)",
+          width: "360px", maxWidth: "calc(100vw - 32px)",
+          height: "500px", maxHeight: "90vh",
           borderRadius: "20px", border: "1px solid hsl(var(--border))",
           background: "hsl(var(--card))",
           boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
@@ -216,7 +223,7 @@ export function KittyAI() {
           ) : (
             <>
               {/* Messages area */}
-              <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "10px", minHeight: "300px", maxHeight: "340px" }}>
 
                 {/* Empty state */}
                 {!hasMessages && !isLoading && (
@@ -253,7 +260,7 @@ export function KittyAI() {
                       borderRadius: msg.role === "user" ? "12px 12px 4px 12px" : "12px 12px 12px 4px",
                       background: msg.role === "user" ? "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))" : "hsl(var(--secondary))",
                       color: msg.role === "user" ? "white" : "hsl(var(--foreground))",
-                      fontFamily: "var(--font-sans)", fontSize: "0.78rem", lineHeight: 1.5, whiteSpace: "pre-wrap", wordBreak: "break-word",
+                      fontFamily: "var(--font-sans)", fontSize: "0.78rem", lineHeight: 1.6, whiteSpace: "pre-line", wordBreak: "break-word",
                     }}>
                       {msg.content}
                     </div>
