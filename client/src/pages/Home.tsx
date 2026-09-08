@@ -8,7 +8,7 @@ import { Search, MessageSquare, FileText, Users, Trophy, Star, Medal, Crown, Gra
 
 // ── Hardcoded stats (update manually) ──
 const STATS = {
-  pyqUploaded: 117,
+  pyqUploaded: 126,
   usersJoined: 174,
 };
 
