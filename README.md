@@ -193,10 +193,4 @@ For code contributions, open a pull request with a clear description of the chan
 
 ---
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-*Made with care by SEU students.*
+*Made with care by SEU mahmud.*
