@@ -1,5 +1,7 @@
 # SEU Rate My Faculty
 
+**Live demo:** https://seu-ratemyfaculty.onrender.com/
+
 A student-built faculty review and academic resource platform for **Southeast University (SEU), Bangladesh**.
 
 SEU Rate My Faculty helps students explore faculty feedback, share their own course experiences, and find available previous-year question papers (PYQs) — all in one place.
