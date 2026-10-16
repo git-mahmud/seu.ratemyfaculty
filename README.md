@@ -193,4 +193,4 @@ For code contributions, open a pull request with a clear description of the chan
 
 ---
 
-*Made with care by SEU mahmud.*
+*Made with care by Mahmud.*
