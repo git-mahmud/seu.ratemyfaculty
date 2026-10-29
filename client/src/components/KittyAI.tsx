@@ -61,12 +61,14 @@ export function KittyAI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [courseContext, setCourseContext] = useState<string | null>(null);
   const [customKey, setCustomKey] = useState(() => {
     try { return localStorage.getItem("kitty_custom_api_key") || ""; } catch { return ""; }
   });
   const [useCustomKey, setUseCustomKey] = useState(() => !!customKey);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Ref to read current messages inside async sendMessage without stale closures.
+  const messagesRef = useRef<Message[]>([]);
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -81,14 +83,19 @@ export function KittyAI() {
     if (!text.trim() || isLoading) return;
     const userMsg = text.trim();
     setInput("");
+    // Capture full conversation history BEFORE adding the new message.
+    // Convert "kitty" role to "assistant" for the API format.
+    const history = messagesRef.current.map(m => ({
+      role: m.role === "user" ? "user" as const : "assistant" as const,
+      content: m.content
+    }));
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     setIsLoading(true);
 
     try {
-      const body: any = { message: userMsg };
+      const body: any = { message: userMsg, messages: history };
       const storedKey = localStorage.getItem("kitty_custom_api_key");
       if (storedKey) body.customApiKey = storedKey;
-      if (courseContext) body.courseContext = courseContext;
 
       const res = await fetch("/api/ai/chat", {
         method: "POST",
@@ -96,13 +103,6 @@ export function KittyAI() {
         body: JSON.stringify(body),
       });
       const data = await res.json();
-
-      // Store courseContext if returned
-      if (data.courseContext) {
-        setCourseContext(data.courseContext);
-      } else {
-        setCourseContext(null);
-      }
 
       const rawReply = data.reply || "Hmm, I got nothing. Try again?";
       const cleanReply = rawReply

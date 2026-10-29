@@ -320,25 +320,13 @@ export async function registerRoutes(
     }
   });
 
-  // === AI CHAT ===
+// === AI CHAT ===
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { message, customApiKey, courseContext } = req.body;
+      const { message, messages, customApiKey } = req.body;
       if (!message || typeof message !== "string") {
         return res.status(400).json({ reply: "Please provide a message." });
-      }
-
-      // Smart identity detection (regex-based) — creator check FIRST
-      const creatorQuestions = /\b(who|by whom).{0,30}(made|built|created|developed|design|code|program|develop).{0,20}(you|kitty|this|app|platform|website)\b/i;
-      const selfQuestions = /\b(who|what).{0,10}(are you|is kitty|is this|your name|yourself)\b/i;
-
-      if (creatorQuestions.test(message)) {
-        return res.json({ reply: "I was created by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He built SEU Rate My Faculty to help students make smarter academic decisions! \ud83d\udc31" });
-      }
-
-      if (selfQuestions.test(message) && !/\b(faculty|teacher|professor|course|subject|pyq|review|marking|exam)\b/i.test(message)) {
-        return res.json({ reply: "I'm Kitty \ud83d\udc31 your AI assistant for SEU Rate My Faculty! I'm here to help SEU students find faculty reviews, marking styles, exam difficulty and previous year questions. Just ask me about any faculty!" });
       }
 
       const apiKey = customApiKey || process.env.GROQ_API_KEY;
@@ -347,6 +335,7 @@ export async function registerRoutes(
         return res.json({ reply: "AI is not configured yet. Please add your Groq API key in settings." });
       }
 
+      // Fetch all teachers
       let teachers: any[] = [];
       try {
         teachers = await storage.getTeachers();
@@ -354,427 +343,139 @@ export async function registerRoutes(
         console.error("AI Chat: Failed to fetch teachers", e);
       }
 
-      const query = message.toLowerCase();
-      let resolvedTeacher: any = null;
-
-      // Multi-turn: Faculty recommendation conversation flow
-      const wantsRecommendation = /\b(best|recommend|suggest|who should|which faculty|good for|suitable|help me find|find me|find a)\b/i.test(message);
-      const wantsFacultyForCourse = /\b(best|good|which|who|suggest|recommend|help|find).{0,30}(faculty|teacher|sir|ma'am|professor).{0,30}(for|in|cse|mat|eng|phy|bba|\d{2,3})\b/i.test(message) ||
-        /\b(faculty|teacher).{0,20}(cse|mat|eng|phy|bba|course|\d{3})\b/i.test(message) ||
-        (/\b(cse|mat|eng|phy|bba)\d{3}\b/i.test(message) && wantsRecommendation);
-
-      const hasPreference = /\b(marks|learn|strict|friendly|easy|hard|chill|no stress|lenient|open minded)\b/i.test(query);
-
-      if (wantsFacultyForCourse && !hasPreference) {
-        const courseMatch = message.match(/\b([A-Z]{2,3}\d{3})\b/i);
-        const courseName = courseMatch ? courseMatch[1].toUpperCase() : "that course";
-        return res.json({
-          reply: `Great! Let me help you find the best faculty for ${courseName} \ud83c\udf93\n\nBefore I suggest, tell me \u2014 what matters most to you?\n\n1\uFE0F\u20E3 Good marks \u2014 easy marking, lenient, student friendly\n2\uFE0F\u20E3 Actually learn \u2014 teaches well, explains clearly, engaging\n3\uFE0F\u20E3 Easy exams \u2014 simple questions, predictable pattern\n4\uFE0F\u20E3 Chill semester \u2014 friendly personality, no stress\n\nJust reply with the number or describe what you want!\n\n[COURSE_CONTEXT:${courseName}]`,
-          courseContext: courseName
-        });
-      }
-
-      // Multi-turn: Handle preference reply (1, 2, 3, 4 or keywords)
-      const preferenceMatch = /^[1-4]$/.test(query.trim());
-      const prefKeywords = {
-        marks: "Open-minded", "good marks": "Open-minded", "1": "Open-minded",
-        learn: "learning", learning: "learning", "2": "learning",
-        "easy exam": "Easy", easy: "Easy", "3": "Easy",
-        chill: "Friendly", friendly: "Friendly", "no stress": "Friendly", "4": "Friendly",
-      };
-
-      let preferenceType: string | null = null;
-      for (const [kw, val] of Object.entries(prefKeywords)) {
-        if (query.trim() === kw || query.includes(kw)) { preferenceType = val; break; }
-      }
-
-      if ((preferenceMatch || preferenceType) && !resolvedTeacher) {
-        const pref = preferenceType || prefKeywords[query.trim() as keyof typeof prefKeywords];
-        if (pref) {
+      // Build faculty context: fetch reviews and PYQs for each teacher in parallel
+      const teachersWithData = await Promise.all(
+        teachers.map(async (t: any) => {
+          let reviews: any[] = [];
+          let pyqs: any[] = [];
           try {
-            // Filter by course if courseContext exists
-            let eligibleTeachers = teachers;
-            if (courseContext) {
-              const courseWords = courseContext.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
-              const courseFiltered = teachers.filter((t: any) =>
-                t.coursesTaught.some((course: string) =>
-                  courseWords.some((word: string) => course.toLowerCase().includes(word))
-                )
-              );
-              if (courseFiltered.length > 0) eligibleTeachers = courseFiltered;
-            }
+            [reviews, pyqs] = await Promise.all([
+              storage.getReviewsByTeacherId(t.id),
+              storage.getPyqsByTeacherId(t.id),
+            ]);
+          } catch (e) { /* skip individual errors */ }
+          return { teacher: t, reviews, pyqs };
+        })
+      );
 
-            const scoredTeachers: { teacher: any; score: number; reason: string }[] = [];
-            for (const t of eligibleTeachers) {
-              if (t.reviewCount < 5) continue;
-              const revs = await storage.getReviewsByTeacherId(t.id);
-              let score = 0;
-              let reason = "";
+      // Build a compact faculty context string with review summaries and PYQs
+      const facultyContext = teachersWithData.map(({ teacher: t, reviews, pyqs }) => {
+        const initMatch = t.fullName.match(/\[([A-Z]+)\]/i);
+        const initials = initMatch ? "[" + initMatch[1] + "]" : "";
+        const name = t.fullName.replace(/\[.*?\]/g, "").trim();
 
-              if (pref === "Open-minded") {
-                score = revs.filter((r: any) => r.markingStyle === "Open-minded").length;
-                reason = "lenient marking";
-              } else if (pref === "learning") {
-                score = revs.filter((r: any) => r.comment && r.comment.length > 20).length;
-                reason = "good teaching";
-              } else if (pref === "Easy") {
-                score = revs.filter((r: any) => r.questionDifficulty === "Easy").length;
-                reason = "easy exams";
-              } else if (pref === "Friendly") {
-                score = revs.filter((r: any) => r.personality === "Friendly").length;
-                reason = "friendly personality";
-              }
+        let section = name + " " + initials + "\n  Department: " + t.department + "\n  Courses: " + ((t.coursesTaught || []).join(", ") || "N/A") + "\n  Reviews: " + t.reviewCount;
 
-              if (score > 0) scoredTeachers.push({ teacher: t, score, reason });
-            }
+        if (reviews.length > 0) {
+          // Aggregate review stats — find the majority value for each field
+          const top = (arr: string[]) => {
+            const counts: Record<string, number> = {};
+            for (const v of arr) counts[v] = (counts[v] || 0) + 1;
+            return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+          };
+          section += "\n  Personality: Mostly " + top(reviews.map((r: any) => r.personality));
+          section += "\n  Marking style: Mostly " + top(reviews.map((r: any) => r.markingStyle));
+          section += "\n  Exam difficulty: Mostly " + top(reviews.map((r: any) => r.questionDifficulty));
+          section += "\n  Best for: " + top(reviews.map((r: any) => r.bestFor));
 
-            scoredTeachers.sort((a, b) => b.score - a.score);
-            const top3 = scoredTeachers.slice(0, 3);
+          // Include standout student comments
+          const comments = reviews.filter((r: any) => r.comment && r.comment.length > 10).slice(0, 3);
+          if (comments.length > 0) {
+            section += "\n  Student comments: " + comments.map((r: any) => '"' + r.comment + '"').join(" | ");
+          }
 
-            if (top3.length === 0) {
-              return res.json({ reply: "I couldn't find enough faculty with that preference and enough reviews. Try asking differently!" });
-            }
+          // Include per-course review breakdown
+          const courseMap: Record<string, any[]> = {};
+          for (const r of reviews) {
+            if (!courseMap[r.courseTaken]) courseMap[r.courseTaken] = [];
+            courseMap[r.courseTaken].push(r);
+          }
+          const courseDetails = Object.entries(courseMap).map(([course, revs]) =>
+            course + ": " + revs.map((r: any) => r.personality + "/" + r.markingStyle + "/" + r.questionDifficulty).join(", ")
+          );
+          if (courseDetails.length > 0) {
+            section += "\n  Course reviews: " + courseDetails.join(" | ");
+          }
+        }
 
-            const reply = top3.map((item, i) => {
-              const initMatch = item.teacher.fullName.match(/\[([A-Z]+)\]/i);
-              const initials = initMatch ? `[${initMatch[1]}]` : "";
-              return `${i + 1}. ${item.teacher.fullName.replace(/\[.*?\]/, "").trim()} ${initials} - Known for ${item.reason} (${item.score}/${item.teacher.reviewCount} reviews agree)`;
-            }).join("\n\n");
+        if (pyqs.length > 0) {
+          const pyqList = pyqs.map((p: any) => p.courseCode + " " + p.examType + " " + p.year + " " + p.semester + ": " + p.fileUrl).join("\n  ");
+          section += "\n  PYQs:\n  " + pyqList;
+        }
 
-            return res.json({
-              reply: `Based on your preference, here are my top picks:\n\n${reply}\n\nWant me to tell you more about any of them? Just mention their name or initials!`
+        return section;
+      }).join("\n\n");
+
+      // Build the system prompt with faculty data injected
+      const systemPrompt = "You are Kitty \ud83d\udc31, the AI assistant for SEU Rate My Faculty \u2014 a student platform for Southeast University (SEU) in Dhaka, Bangladesh. You were built by Mahmudur Rahman, a CSE student from Batch 70 at SEU.\n\n" +
+        "You help students find faculty, understand reviews, get PYQs (Previous Year Questions), and make better academic decisions.\n\n" +
+        "CONVERSATION INTELLIGENCE:\n" +
+        "- You can see the full conversation history. Use it to understand follow-up questions and references.\n" +
+        "- When a student says \"tell me more about him\", \"what about his teaching style\", or \"who is better\", refer to the faculty member discussed in previous messages. Never confuse a follow-up about a faculty with a question about yourself or your creator.\n" +
+        "- Resolve pronouns like \"him\", \"her\", \"that faculty\", \"them\" from the conversation context.\n" +
+        "- Track which faculty is being discussed. If the student was discussing Professor X, \"tell me more about him\" means more about Professor X \u2014 not about your creator, not about yourself.\n" +
+        "- When the student switches to a new faculty, update your focus.\n" +
+        "- If something is genuinely ambiguous, ask a brief clarification question.\n" +
+        "- Understand informal, short, misspelled, and mixed Bangla-English messages from Bangladeshi university students.\n" +
+        "- Don't repeat your full previous answer when asked to \"tell me more.\" Add new information or a different angle.\n" +
+        "- Be conversational and natural \u2014 like a knowledgeable senior student giving friendly advice.\n\n" +
+        "ANSWERING RULES:\n" +
+        "- Give detailed, helpful answers. When a student asks about a faculty, provide a thorough summary: teaching style, marking approach, exam difficulty, who they're best for, and student opinions. Don't give one-liners.\n" +
+        "- Use only the faculty data provided below. Never fabricate information.\n" +
+        "- If you don't have enough data about a faculty (fewer than 5 reviews), say so honestly.\n" +
+        "- Only mention the creator (Mahmudur Rahman) when the user is genuinely asking about YOU (Kitty) or the APP \u2014 never when they're asking about a faculty member.\n" +
+        "- Summarize review data into natural language. Don't list \"Review 1:\", \"Review 2:\". Describe the overall picture.\n" +
+        "- Quote 1-2 standout student comments when relevant.\n" +
+        "- When listing PYQs, put each on a new line exactly as: COURSECODE ExamType Year Semester: DRIVELINK\n" +
+        "- When recommending faculty, rank them and explain why each is a good or poor match.\n" +
+        "- When a student asks for a recommendation but hasn't specified preferences, ask what matters most (good marks, learning, easy exams, or a chill semester).\n" +
+        "- Never say \"I don't understand\" \u2014 always try your best to help.\n" +
+        "- Stay on topic (SEU faculty, reviews, PYQs, the platform) but handle general greetings naturally.\n\n" +
+        "FORMATTING:\n" +
+        "- Never use markdown. No asterisks, no bold, no headers, no bullet points with *. Write in plain conversational sentences with line breaks.\n" +
+        "- Don't introduce yourself in every response. Get straight to the answer.\n" +
+        "- Keep responses under 250 words unless the student asks for detail.\n\n" +
+        "=== FACULTY DATA ===\n" + facultyContext;
+
+      // Build Groq messages: system prompt + conversation history + current message
+      const groqMessages: any[] = [{ role: "system", content: systemPrompt }];
+
+      // Add conversation history from the frontend (already in user/assistant format)
+      if (Array.isArray(messages)) {
+        for (const msg of messages.slice(-30)) {
+          if (msg && msg.role && msg.content) {
+            groqMessages.push({
+              role: msg.role === "user" ? "user" : "assistant",
+              content: msg.content,
             });
-          } catch (e) {
-            console.error("AI Chat preference handling error:", e);
           }
         }
       }
 
-      // Step 1: Build initial map from all teachers
-      const initialMap: Record<string, any> = {};
-      teachers.forEach(t => {
-        const match = t.fullName.match(/\[([A-Z]+)\]/i);
-        if (match) initialMap[match[1].toUpperCase()] = t;
+      // Add the current user message
+      groqMessages.push({ role: "user", content: message });
+
+      // Call Groq API
+      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-120b",
+          messages: groqMessages,
+          temperature: 0.7,
+          max_tokens: 1000,
+          top_p: 0.9,
+        }),
       });
 
-      // Step 2: Check if user message contains any initial (case insensitive)
-      const msgWords = message.toUpperCase().split(/[\s\[\].,!?]+/).filter(Boolean);
-      for (const word of msgWords) {
-        if (initialMap[word]) {
-          resolvedTeacher = initialMap[word];
-          break;
-        }
-      }
-
-      // Step 3: Smarter name matching with scoring
-      if (!resolvedTeacher) {
-        const skipWords = ["md", "dr", "bin", "binte", "al", "is", "how", "for", "who", "about", "tell", "me", "the", "a", "an", "and", "of", "in", "strict", "friendly", "best", "worst", "what", "good", "bad", "sir", "mam", "madam", "professor", "prof", "can", "you", "know", "think", "like"];
-        const msgLower = message.toLowerCase();
-
-        const scores = teachers.map(t => {
-          const nameParts = t.fullName.toLowerCase()
-            .replace(/\[.*?\]/g, "")
-            .split(/\s+/)
-            .filter((w: string) => w.length > 2 && !skipWords.includes(w));
-
-          let score = 0;
-          nameParts.forEach((part: string) => {
-            if (msgLower.includes(part)) score += part.length;
-          });
-          return { teacher: t, score };
-        }).filter(x => x.score > 3).sort((a, b) => b.score - a.score);
-
-        if (scores.length === 1) {
-          resolvedTeacher = scores[0].teacher;
-        } else if (scores.length >= 2 && scores[0].score - scores[1].score >= 3) {
-          resolvedTeacher = scores[0].teacher;
-        } else if (scores.length >= 2 && scores[0].score - scores[1].score < 3) {
-          const options = scores.slice(0, 4).map(s => {
-            const initMatch = s.teacher.fullName.match(/\[([A-Z]+)\]/i);
-            return initMatch ? `[${initMatch[1]}] ${s.teacher.fullName.replace(/\[.*?\]/g, "").trim()}` : s.teacher.fullName;
-          }).join("\n");
-          return res.json({
-            reply: `I found a few faculty members that could match. Which one did you mean?\n\n${options}\n\nYou can reply with their initials like "FBH"`
-          });
-        }
-      }
-
-      // Step 3.5: Course-based faculty search (if no name/initial matched)
-      if (!resolvedTeacher) {
-        const courseStopWords = ["suggest", "best", "faculty", "for", "me", "find", "who", "teaches", "teach", "taking", "which", "is", "good", "recommend", "want", "help", "the", "and", "tell", "about", "how", "are", "you", "your", "what", "can", "do", "does", "did", "will", "would", "should", "could", "have", "has", "been", "being", "was", "were", "not", "but", "from", "this", "that", "with", "they", "their", "there", "here", "just", "also", "very", "really", "please", "thanks", "thank", "hello", "hey", "hi"];
-        const courseQueryWords = message.toLowerCase()
-          .replace(/[^a-z0-9\s]/g, "")
-          .split(/\s+/)
-          .filter((w: string) => w.length > 2 && !courseStopWords.includes(w));
-
-        const courseMatches = teachers.filter((t: any) =>
-          t.coursesTaught.some((course: string) =>
-            courseQueryWords.some((word: string) => course.toLowerCase().includes(word))
-          )
-        );
-
-        if (courseMatches.length > 0) {
-          try {
-            const teachersWithReviews = await Promise.all(
-              courseMatches.map(async (t: any) => {
-                const reviews = await storage.getReviewsByTeacherId(t.id);
-                const pyqs = await storage.getPyqsByTeacherId(t.id);
-                return { teacher: t, reviews, pyqs };
-              })
-            );
-
-            const qualified = teachersWithReviews.filter(t => t.reviews.length >= 5);
-
-            if (qualified.length === 0) {
-              return res.json({ reply: `I found ${courseMatches.length} faculty who teach that course, but none have enough reviews yet (minimum 5 needed). The faculty are: ${courseMatches.map((t: any) => t.fullName).join(", ")}. Be the first to review them!` });
-            }
-
-            const courseContext = qualified.map(({ teacher, reviews, pyqs }) => {
-              const reviewSummary = reviews.map((r: any) =>
-                `Personality: ${r.personality}, Marking: ${r.markingStyle}, Difficulty: ${r.questionDifficulty}, Best for: ${r.bestFor || "N/A"}, Comment: ${r.comment || "none"}`
-              ).join("\n");
-              const pyqList = pyqs.map((p: any) => `${p.courseCode} ${p.examType} ${p.year} ${p.semester}: ${p.fileUrl}`).join("\n");
-              return `Faculty: ${teacher.fullName} (${teacher.department})\nReviews (${reviews.length}):\n${reviewSummary}\nPYQs:\n${pyqList || "None available"}`;
-            }).join("\n\n---\n\n");
-
-            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-              method: "POST",
-              headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-              body: JSON.stringify({
-                model: "openai/gpt-oss-120b",
-                messages: [
-                  { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal messages from Bangladeshi university students. You are Kitty, a cute AI assistant for SEU Rate My Faculty. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Keep responses under 200 words. Suggest the best faculty based on the reviews. Rank them and explain briefly why each is good or not. Be like a senior student giving advice.` },
-                  { role: "user", content: `Student question: ${message}\n\nHere are the faculty who teach this course with their reviews:\n${courseContext}\n\nSuggest the best faculty based on the reviews. Rank them and explain briefly.` }
-                ],
-                max_tokens: 500,
-                temperature: 0.7,
-              }),
-            });
-            console.log("AI Chat course-search Groq status:", groqRes.status);
-            if (groqRes.ok) {
-              const groqData = await groqRes.json();
-              const reply = groqData.choices?.[0]?.message?.content || "I couldn't generate a response.";
-              return res.json({ reply });
-            }
-          } catch (e) {
-            console.error("AI Chat course search error:", e);
-          }
-        }
-      }
-
-      // Step 4: If teacher found, fetch their data
-      if (resolvedTeacher) {
-        let teacherReviews: any[] = [];
-        let teacherPyqs: any[] = [];
-        try {
-          teacherReviews = await storage.getReviewsByTeacherId(resolvedTeacher.id);
-          teacherPyqs = await storage.getPyqsByTeacherId(resolvedTeacher.id);
-        } catch (e) {
-          console.error("AI Chat: Failed to fetch teacher data", e);
-        }
-
-        if (teacherReviews.length < 5) {
-          // Still provide PYQs even with less than 5 reviews
-          if (teacherPyqs.length > 0) {
-            const pyqList = teacherPyqs.map((p: any) => `${p.courseCode} ${p.examType} ${p.year} ${p.semester}: ${p.fileUrl}`).join("\n");
-            return res.json({
-              reply: `I don't have enough reviews about ${resolvedTeacher.fullName} yet for a full summary (only ${teacherReviews.length} so far, need 5). But here are their available PYQs:\n\n${pyqList}\n\nBe the first to review this faculty!`
-            });
-          }
-          return res.json({
-            reply: `I don't have enough data about ${resolvedTeacher.fullName} yet. We need at least 5 reviews for an accurate summary. Currently there are only ${teacherReviews.length} review(s). Be the first to review!`
-          });
-        }
-
-        const reviewsContext = teacherReviews.map((r: any, i: number) =>
-          `Review ${i + 1}: Personality: ${r.personality}, Marking: ${r.markingStyle}, Difficulty: ${r.questionDifficulty}, Best For: ${r.bestFor || "N/A"}, Course: ${r.courseTaken}${r.comment ? `, Comment: "${r.comment}"` : ""}`
-        ).join("\n");
-
-        const pyqContext = teacherPyqs.length > 0
-          ? "\nAvailable PYQs:\n" + teacherPyqs.map((p: any) => `- ${p.courseCode} ${p.examType} ${p.year} (${p.semester}): ${p.fileUrl}`).join("\n")
-          : "\nNo PYQs available for this faculty.";
-
-        const context = `Faculty: ${resolvedTeacher.fullName}\nDepartment: ${resolvedTeacher.department}\nUniversity: ${resolvedTeacher.university}\nCourses: ${resolvedTeacher.coursesTaught.join(", ")}\nTotal Reviews: ${teacherReviews.length}\n\n${reviewsContext}\n${pyqContext}`;
-
-        // Intent detection
-        const wantsPyq = /\b(pyq|past paper|previous year|question paper|paper|pq)\b/i.test(message);
-        const wantsReview = /\b(review|rating|how is|how are|tell me|about|summary|opinion|feedback|strict|friendly|marking|personality|exam|difficult)\b/i.test(message);
-        const wantsRecommendation = /\b(best|recommend|suggest|who should|which faculty|good for|suitable|help me find|find me|find a)\b/i.test(message);
-
-        let intentInstruction = "";
-        if (wantsPyq && !wantsReview) {
-          intentInstruction = "The student wants PYQ links for this faculty. List all available PYQs with course code, exam type, year, semester and the Google Drive link. If no PYQs exist say so clearly.";
-        } else if (wantsReview && !wantsPyq) {
-          intentInstruction = "The student wants a review summary. Summarize personality, marking style, exam difficulty and who they are best for. Keep it under 100 words.";
-        } else if (wantsRecommendation) {
-          intentInstruction = "The student wants a faculty recommendation. Suggest the best matching faculty based on the criteria they mentioned.";
-        } else {
-          intentInstruction = "Answer whatever the student is asking conversationally and helpfully.";
-        }
-
-        try {
-          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: "openai/gpt-oss-120b",
-              messages: [
-                { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Never say you were made by Groq, Meta, or any tech company. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal, short, and misspelled messages from Bangladeshi university students. If someone writes 'fbh pyq' understand they want PYQs for FBH. If someone writes 'who strict cse' understand they want strict faculty in CSE. If someone writes 'help me find a faculty' ask them what subject or criteria they need. If someone writes 'help me find a pyq' ask them which faculty or course they need. Always try to understand intent even if grammar is broken, words are missing, or spellings are wrong. Never say you don't understand — always try your best to help.\n\nYou are Kitty, a cute and helpful AI assistant for SEU Rate My Faculty. You help students understand faculty based on real reviews.\n\nRules:\n- Mention overall personality based on review majority\n- Summarize marking style honestly\n- Mention exam difficulty\n- Say who they're best for\n- Quote 1-2 student comments if relevant\n- Share PYQ links if available\n- When listing PYQs, always format each one on a new line like this exactly: 'COURSECODE ExamType Year Semester: DRIVELINK' for example: 'CSE181 Mid 2024 Spring: https://drive.google.com/...'\n- Be friendly, concise, honest\n- Never make up info\n- Never use markdown formatting. No asterisks, no bold **text**, no bullet points with *, no headers with #. Write in plain conversational sentences. Use line breaks between sections instead.\n- Never introduce yourself in every response. Only greet once at the start of a conversation. Get straight to the answer.\n- Keep responses under 150 words. Be direct. Don't say 'Review 1, Review 2' - instead summarize the overall picture. Don't mention review numbers at all. Sound like a helpful friend, not a report generator.\n- If anyone asks who made you, who created you, who built you, or who is your developer/creator, always answer: 'I was built by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He created SEU Rate My Faculty to help students like you make better academic decisions! 🐱'` },
-                { role: "user", content: `${intentInstruction}\n\nStudent question: ${message}\n\nFaculty data:\n${context}` }
-              ],
-              temperature: 0.7,
-              max_tokens: 800,
-            }),
-          });
-          console.log("AI Chat Groq response status:", groqRes.status);
-          if (!groqRes.ok) {
-            const errBody = await groqRes.text();
-            console.error("AI Chat Groq error:", errBody);
-            return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
-          }
-          const groqData = await groqRes.json();
-          return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a response." });
-        } catch (e) {
-          console.error("AI Chat Groq fetch failed:", e);
-          return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
-        }
-      }
-
-      // Step 5: No teacher matched — check for recommendation/general queries
-      // Detect recommendation criteria
-      const personalityKeywords = { "friendly": "Friendly", "chill": "Friendly", "easy going": "Friendly", "approachable": "Friendly", "strict": "Strict", "neutral": "Neutral" };
-      const markingKeywords = { "open minded": "Open-minded", "lenient": "Open-minded", "easy marking": "Open-minded", "strict marking": "Strict", "fair": "Average" };
-      const difficultyKeywords = { "easy exam": "Easy", "easy questions": "Easy", "hard exam": "Hard", "tough": "Hard" };
-      const bestForKeywords = { "weak student": "Weak Students", "beginners": "Weak Students", "struggling": "Weak Students", "average student": "Average Students", "strong student": "Strong Students" };
-
-      let detectedPersonality: string | null = null;
-      let detectedMarking: string | null = null;
-      let detectedDifficulty: string | null = null;
-      let detectedBestFor: string | null = null;
-      let detectedCourse: string | null = null;
-      let isGeneralListQuery = false;
-      let generalListType: string | null = null;
-
-      for (const [kw, val] of Object.entries(personalityKeywords)) { if (query.includes(kw)) { detectedPersonality = val; break; } }
-      for (const [kw, val] of Object.entries(markingKeywords)) { if (query.includes(kw)) { detectedMarking = val; break; } }
-      for (const [kw, val] of Object.entries(difficultyKeywords)) { if (query.includes(kw)) { detectedDifficulty = val; break; } }
-      for (const [kw, val] of Object.entries(bestForKeywords)) { if (query.includes(kw)) { detectedBestFor = val; break; } }
-
-      // Detect course codes (CSE181, MAT110, etc.)
-      const courseMatch = message.match(/[A-Z]{2,4}\d{3}/i);
-      if (courseMatch) detectedCourse = courseMatch[0].toUpperCase();
-      // Detect subject names
-      const subjectMap: Record<string, string> = { "discrete math": "CSE181", "calculus": "MAT", "english": "ENG", "physics": "PHY", "data structure": "CSE", "programming": "CSE" };
-      for (const [subj, code] of Object.entries(subjectMap)) { if (query.includes(subj)) { detectedCourse = code; break; } }
-
-      // Detect general list queries
-      if (query.includes("most reviews") || query.includes("most popular")) { isGeneralListQuery = true; generalListType = "most_reviews"; }
-      else if (query.includes("best faculty") || query.includes("best teacher")) { isGeneralListQuery = true; generalListType = "best_overall"; }
-      else if (query.includes("who teaches") || query.includes("which faculty teaches")) { isGeneralListQuery = true; generalListType = "teaches_course"; }
-      else if (query.includes("list all") || query.includes("faculty in")) { isGeneralListQuery = true; generalListType = "department"; }
-
-      const hasCriteria = detectedPersonality || detectedMarking || detectedDifficulty || detectedBestFor || detectedCourse || isGeneralListQuery;
-
-      if (hasCriteria) {
-        try {
-          // Fetch reviews for all teachers with 5+ reviews
-          const teachersWithData: { teacher: any; reviews: any[]; score: number }[] = [];
-          for (const t of teachers) {
-            if (t.reviewCount < 5) continue;
-            if (detectedCourse && !t.coursesTaught.some((c: string) => c.toUpperCase().includes(detectedCourse!))) continue;
-
-            const revs = await storage.getReviewsByTeacherId(t.id);
-            let score = 0;
-
-            if (detectedPersonality) score += revs.filter((r: any) => r.personality === detectedPersonality).length;
-            if (detectedMarking) score += revs.filter((r: any) => r.markingStyle === detectedMarking).length;
-            if (detectedDifficulty) score += revs.filter((r: any) => r.questionDifficulty === detectedDifficulty).length;
-            if (detectedBestFor) score += revs.filter((r: any) => r.bestFor === detectedBestFor).length;
-            if (isGeneralListQuery && generalListType === "most_reviews") score = revs.length;
-            if (isGeneralListQuery && generalListType === "best_overall") score = revs.filter((r: any) => r.personality === "Friendly" || r.markingStyle === "Open-minded").length;
-            if (!detectedPersonality && !detectedMarking && !detectedDifficulty && !detectedBestFor && !isGeneralListQuery) score = revs.length;
-
-            teachersWithData.push({ teacher: t, reviews: revs, score });
-          }
-
-          teachersWithData.sort((a, b) => b.score - a.score);
-          const top3 = teachersWithData.slice(0, 3);
-
-          if (top3.length === 0) {
-            return res.json({ reply: "I couldn't find any faculty matching that criteria with enough reviews. Try asking differently or check back later!" });
-          }
-
-          const recContext = top3.map((td, i) => {
-            const r = td.reviews;
-            const personalities = r.map((rv: any) => rv.personality);
-            const topPersonality = ["Friendly", "Strict", "Neutral"].sort((a, b) => personalities.filter((p: string) => p === b).length - personalities.filter((p: string) => p === a).length)[0];
-            const comments = r.filter((rv: any) => rv.comment).slice(0, 2).map((rv: any) => `"${rv.comment}"`).join(", ");
-            return `${i + 1}. ${td.teacher.fullName} (${td.teacher.department}) - ${td.reviews.length} reviews, mostly ${topPersonality}, score: ${td.score}. Comments: ${comments || "No comments"}`;
-          }).join("\n");
-
-          const criteriaDesc = [
-            detectedPersonality && `personality: ${detectedPersonality}`,
-            detectedMarking && `marking: ${detectedMarking}`,
-            detectedDifficulty && `difficulty: ${detectedDifficulty}`,
-            detectedBestFor && `best for: ${detectedBestFor}`,
-            detectedCourse && `course: ${detectedCourse}`,
-            generalListType,
-          ].filter(Boolean).join(", ");
-
-          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: "openai/gpt-oss-120b",
-              messages: [
-                { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Never say you were made by Groq, Meta, or any tech company. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal, short, and misspelled messages from Bangladeshi university students. Always try to understand intent even if grammar is broken, words are missing, or spellings are wrong. Never say you don't understand — always try your best to help.\n\nYou are Kitty, a cute AI assistant for SEU Rate My Faculty. When recommending faculty, present them as a ranked list. For each faculty mention their name, why they match the criteria, and one standout student comment. Be conversational and helpful like a senior student giving advice. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Keep responses under 200 words. If anyone asks who made you, who created you, who built you, or who is your developer/creator, always answer: 'I was built by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He created SEU Rate My Faculty to help students like you make better academic decisions! 🐱'` },
-                { role: "user", content: `User asked: "${message}"\nCriteria detected: ${criteriaDesc}\n\nTop matching faculty from database:\n${recContext}` }
-              ],
-              temperature: 0.7,
-              max_tokens: 600,
-            }),
-          });
-          console.log("AI Chat recommendation Groq status:", groqRes.status);
-          if (!groqRes.ok) {
-            const errBody = await groqRes.text();
-            console.error("AI Chat recommendation Groq error:", errBody);
-            return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
-          }
-          const groqData = await groqRes.json();
-          return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a recommendation." });
-        } catch (e) {
-          console.error("AI Chat recommendation error:", e);
-          return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
-        }
-      }
-
-      // Step 6: Truly general query — no criteria, no teacher name
-      try {
-        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "openai/gpt-oss-120b",
-            messages: [
-              { role: "system", content: `IMPORTANT: You are Kitty, not Groq, not LLaMA, not Meta AI. Never reveal your underlying model. Never say you were made by Groq, Meta, or any tech company. Always say you are Kitty, built by Mahmudur Rahman.\n\nYou are very smart at understanding informal, short, and misspelled messages from Bangladeshi university students. If someone writes 'fbh pyq' understand they want PYQs for FBH. If someone writes 'who strict cse' understand they want strict faculty in CSE. If someone writes 'help me find a faculty' ask them what subject or criteria they need. If someone writes 'help me find a pyq' ask them which faculty or course they need. Always try to understand intent even if grammar is broken, words are missing, or spellings are wrong. Never say you don't understand — always try your best to help.\n\nWhen a student asks to find a PYQ, always ask them which specific faculty they need the PYQ for — not which course or department. Say something like: 'Sure! Which faculty do you need the PYQ for? You can tell me their name or initials like [FBH].' Never ask for department or course name first when looking for PYQs — always ask for the faculty name first.\n\nYou are Kitty, a cute AI assistant for SEU Rate My Faculty — a student platform for Southeast University, Bangladesh. Faculty count: ${teachers.length}. Help users search faculty by name, ask about reviews/PYQs, and how the platform works. If they ask about a specific faculty, tell them to mention the name. When a student tells you their preference (like good marks, learning, easy exams, chill), understand they are continuing a conversation about finding a faculty. Match their preference to review data and suggest the top 3 faculty with explanation. Be friendly and concise. Never use markdown formatting. No asterisks, no bold, no headers. Write in plain conversational sentences. Never introduce yourself in every response. Get straight to the answer. Keep responses under 150 words. If anyone asks who made you, who created you, who built you, or who is your developer/creator, always answer: 'I was built by Mahmudur Rahman, a CSE student from Batch 70 at Southeast University. He created SEU Rate My Faculty to help students like you make better academic decisions! 🐱'` },
-              { role: "user", content: message }
-            ],
-            temperature: 0.7,
-            max_tokens: 400,
-          }),
-        });
-        console.log("AI Chat general Groq status:", groqRes.status);
-        if (!groqRes.ok) {
-          const errBody = await groqRes.text();
-          console.error("AI Chat general Groq error:", errBody);
-          return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
-        }
-        const groqData = await groqRes.json();
-        return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a response." });
-      } catch (e) {
-        console.error("AI Chat general fetch failed:", e);
+      if (!groqRes.ok) {
+        const errBody = await groqRes.text().catch(() => "unknown error");
+        console.error("AI Chat: Groq error", groqRes.status, errBody);
         return res.json({ reply: "Sorry, I'm having trouble right now. Please try again!" });
       }
+
+      const groqData = await groqRes.json();
+      return res.json({ reply: groqData.choices?.[0]?.message?.content || "I couldn't generate a response." });
 
     } catch (err) {
       console.error("AI Chat top-level error:", err);
