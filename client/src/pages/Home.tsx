@@ -9,7 +9,7 @@ import { Search, MessageSquare, FileText, Users, Trophy, Star, Medal, Crown, Gra
 // ── Hardcoded stats (update manually) ──
 const STATS = {
   pyqUploaded: 126,
-  usersJoined: 189,
+  usersJoined: 191,
 };
 
 const PAGE_SIZE = 6;
